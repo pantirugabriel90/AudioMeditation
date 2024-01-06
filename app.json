@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "AudioMeditation",
+    "slug": "AudioMeditation",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
