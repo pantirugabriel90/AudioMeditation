@@ -6,6 +6,7 @@ import * as Permissions from "expo-permissions";
 const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
   const [sound, setSound] = useState();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     getPermissionsAsync();
@@ -21,22 +22,10 @@ const HomeScreen = () => {
     }
   };
 
-  const startRecording = async () => {
-    try {
-      const recordingObj = new Audio.Recording();
-      await recordingObj.prepareToRecordAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      await recordingObj.startAsync();
-      setRecording(recordingObj);
-    } catch (error) {
-      console.error("Error starting recording:", error);
-    }
-  };
-
-  const stopRecording = async () => {
+  const toggleRecording = async () => {
     try {
       if (recording) {
+        // Dacă înregistrează, oprește și descarcă
         await recording.stopAndUnloadAsync();
         const { sound } = await recording.createNewLoadedSoundAsync(
           {},
@@ -48,19 +37,32 @@ const HomeScreen = () => {
         );
         setSound(sound);
         setRecording(null);
+      } else {
+        // Dacă nu înregistrează, începe înregistrarea
+        const recordingObj = new Audio.Recording();
+        await recordingObj.prepareToRecordAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        await recordingObj.startAsync();
+        setRecording(recordingObj);
       }
     } catch (error) {
-      console.error("Error stopping recording:", error);
+      console.error("Error:", error);
     }
   };
 
-  const playSound = async () => {
+  const togglePlayStop = async () => {
     try {
       if (sound) {
-        await sound.replayAsync();
+        if (isPlaying) {
+          await sound.stopAsync();
+        } else {
+          await sound.replayAsync();
+        }
+        setIsPlaying(!isPlaying);
       }
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.error("Error:", error);
     }
   };
 
@@ -68,8 +70,8 @@ const HomeScreen = () => {
     try {
       if (sound) {
         await sound.stopAsync();
-        // Reset the sound to allow replay from the beginning
         await sound.setPositionAsync(0);
+        setIsPlaying(false);
       }
     } catch (error) {
       console.error("Error stopping sound:", error);
@@ -81,12 +83,9 @@ const HomeScreen = () => {
       <Text>{recording ? "Recording..." : "Not Recording"}</Text>
       <Button
         title={recording ? "Stop Recording" : "Start Recording"}
-        onPress={recording ? stopRecording : startRecording}
+        onPress={toggleRecording}
       />
-      <View style={styles.buttonsContainer}>
-        <Button title="Play" onPress={playSound} />
-        <Button title="Stop" onPress={stopSound} />
-      </View>
+      <Button title={isPlaying ? "Stop" : "Play"} onPress={togglePlayStop} />
     </View>
   );
 };
@@ -96,10 +95,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    marginTop: 20,
   },
 });
 
