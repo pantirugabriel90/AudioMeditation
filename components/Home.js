@@ -13,13 +13,17 @@ const HomeScreen = () => {
   }, []);
 
   const getPermissionsAsync = async () => {
-    const { status } = await Permissions.askAsync(
-      Permissions.AUDIO_RECORDING,
-      Permissions.AUDIO_PLAYBACK
-    );
-    if (status !== "granted") {
-      console.error("Audio permissions not granted!");
+    const AudioPerm = await Audio.requestPermissionsAsync();
+    if (AudioPerm.status === "granted") {
+      console.log("Audio Permission Granted");
     }
+    // const { status } = await Permissions.askAsync(
+    //   Permissions.AUDIO_RECORDING,
+    //   Permissions.AUDIO_PLAYBACK
+    // );
+    // if (status !== "granted") {
+    //   console.error("Audio permissions not granted!");
+    // }
   };
 
   const toggleRecording = async () => {
