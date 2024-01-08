@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Audio } from "expo-av";
 import * as Permissions from "expo-permissions";
 
@@ -80,12 +80,25 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text>{recording ? "Recording..." : "Not Recording"}</Text>
-      <Button
-        title={recording ? "Stop Recording" : "Start Recording"}
+      <Text style={styles.statusText}>
+        {recording ? "Recording..." : "Not Recording"}
+      </Text>
+      <TouchableOpacity
+        style={[styles.button, styles.recordButton]}
         onPress={toggleRecording}
-      />
-      <Button title={isPlaying ? "Stop" : "Play"} onPress={togglePlayStop} />
+        // disabled={isPlaying}
+      >
+        <Text style={styles.buttonText}>
+          {recording ? "Stop Recording" : "Start Recording"}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.playButton]}
+        onPress={togglePlayStop}
+        // disabled={recording}
+      >
+        <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -95,6 +108,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  statusText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  button: {
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  recordButton: {
+    backgroundColor: "#ff0000",
+  },
+  playButton: {
+    backgroundColor: "#00ff00",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
