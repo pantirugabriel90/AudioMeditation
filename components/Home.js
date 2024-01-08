@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Button, StyleSheet } from "react-native";
 import { Audio } from "expo-av";
 import * as Permissions from "expo-permissions";
 
@@ -12,9 +12,12 @@ const HomeScreen = () => {
   }, []);
 
   const getPermissionsAsync = async () => {
-    const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
+    const { status } = await Permissions.askAsync(
+      Permissions.AUDIO_RECORDING,
+      Permissions.AUDIO_PLAYBACK
+    );
     if (status !== "granted") {
-      console.error("Audio recording permission not granted!");
+      console.error("Audio permissions not granted!");
     }
   };
 
@@ -51,35 +54,39 @@ const HomeScreen = () => {
     }
   };
 
-  const stopSound = () => {
-    if (sound) {
-      sound.stopAsync();
-      setSound(null);
+  const playSound = async () => {
+    try {
+      if (sound) {
+        await sound.replayAsync();
+      }
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
+
+  const stopSound = async () => {
+    try {
+      if (sound) {
+        await sound.stopAsync();
+        // Reset the sound to allow replay from the beginning
+        await sound.setPositionAsync(0);
+      }
+    } catch (error) {
+      console.error("Error stopping sound:", error);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text>{recording ? "Recording..." : "Not Recording"}</Text>
-      <TouchableOpacity
-        style={styles.stopButton}
-        onPress={stopRecording}
-        disabled={!recording} // Disable the button if not recording
-      >
-        <Text>Stop</Text>
-      </TouchableOpacity>
       <Button
-        title={recording ? "Recording..." : "Start Recording"}
+        title={recording ? "Stop Recording" : "Start Recording"}
         onPress={recording ? stopRecording : startRecording}
-        disabled={!!recording} // Disable the button if already recording
       />
-      {sound && (
-        <>
-          <Text>Playing Recorded Sound</Text>
-          <Button title="Play" onPress={() => sound.replayAsync()} />
-          <Button title="Stop" onPress={stopSound} />
-        </>
-      )}
+      <View style={styles.buttonsContainer}>
+        <Button title="Play" onPress={playSound} />
+        <Button title="Stop" onPress={stopSound} />
+      </View>
     </View>
   );
 };
@@ -90,11 +97,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  stopButton: {
+  buttonsContainer: {
+    flexDirection: "row",
     marginTop: 20,
-    padding: 10,
-    backgroundColor: "red",
-    borderRadius: 5,
   },
 });
 
