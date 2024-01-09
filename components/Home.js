@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  AsyncStorage,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Updated import
 import { Audio } from "expo-av";
 
 const HomeScreen = () => {
@@ -15,10 +15,11 @@ const HomeScreen = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatDelay, setRepeatDelay] = useState("0");
   const [delayUnit, setDelayUnit] = useState("seconds"); // Initial unit is seconds
-
+  const [recordingsList, setRecordingsList] = useState([]);
   useEffect(() => {
     getPermissionsAsync();
     loadMemorizedRecording();
+    replayRecording(); // Replay recording when component mounts
   }, []);
 
   const getPermissionsAsync = async () => {
@@ -93,6 +94,10 @@ const HomeScreen = () => {
       if (recording) {
         const uri = await recording.getURI();
         await AsyncStorage.setItem("memorizedRecording", uri);
+
+        // Adăugați înregistrarea la lista de înregistrări
+        setRecordingsList((prevList) => [...prevList, uri]);
+
         console.log("Recording memorized:", uri);
       }
     } catch (error) {
@@ -126,9 +131,56 @@ const HomeScreen = () => {
     }
   };
 
-  const saveDelay = () => {
-    // You can add additional validation here if needed
-    console.log(`Delay: ${repeatDelay} ${delayUnit}`);
+  const replayRecording = async () => {
+    try {
+      const delaySettings = await AsyncStorage.getItem("delaySettings");
+      if (delaySettings) {
+        const { repeatDelay: savedRepeatDelay, delayUnit: savedDelayUnit } =
+          JSON.parse(delaySettings);
+
+        // Update state with saved delay and unit
+        setRepeatDelay(savedRepeatDelay);
+        setDelayUnit(savedDelayUnit);
+
+        // Replay the recording with the updated delay
+        const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
+        if (memorizedURI) {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: memorizedURI },
+            {},
+            (status) => {
+              if (status.didJustFinish) {
+                const delayInSeconds =
+                  savedDelayUnit === "seconds"
+                    ? parseInt(savedRepeatDelay)
+                    : parseInt(savedRepeatDelay) * 60;
+                setTimeout(() => {
+                  sound.replayAsync();
+                }, delayInSeconds * 1000);
+              }
+            }
+          );
+          setSound(sound);
+        }
+      }
+    } catch (error) {
+      console.error("Error replaying recording:", error);
+    }
+  };
+
+  const saveDelay = async () => {
+    try {
+      // Save the delay and unit to AsyncStorage
+      await AsyncStorage.setItem(
+        "delaySettings",
+        JSON.stringify({ repeatDelay, delayUnit })
+      );
+
+      // Replay the recording immediately with the new delay
+      replayRecording();
+    } catch (error) {
+      console.error("Error saving delay settings:", error);
+    }
   };
 
   return (
@@ -170,18 +222,18 @@ const HomeScreen = () => {
             {delayUnit === "seconds" ? "Minutes" : "Seconds"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.saveButton]}
+          onPress={saveDelay}
+        >
+          <Text style={styles.buttonText}>Save Delay</Text>
+        </TouchableOpacity>
       </View>
       <TouchableOpacity
         style={[styles.button, styles.memorizeButton]}
         onPress={memorizeRecording}
       >
         <Text style={styles.buttonText}>Memorize Recording</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, styles.saveButton]}
-        onPress={saveDelay}
-      >
-        <Text style={styles.buttonText}>Save Delay</Text>
       </TouchableOpacity>
     </View>
   );
