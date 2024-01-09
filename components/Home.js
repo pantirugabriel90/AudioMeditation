@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
+import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Updated import
 import { Audio } from "expo-av";
 
@@ -22,13 +23,21 @@ const HomeScreen = () => {
   useEffect(() => {
     getPermissionsAsync();
     loadMemorizedRecording();
-    replayRecording(); // Replay recording when component mounts
   }, []);
 
   const getPermissionsAsync = async () => {
-    const AudioPerm = await Audio.requestPermissionsAsync();
-    if (AudioPerm.status === "granted") {
-      console.log("Audio Permission Granted");
+    try {
+      // Request audio permissions
+      const audioPermission = await Audio.requestPermissionsAsync();
+      if (audioPermission.status !== "granted") {
+        console.log("Audio permission not granted");
+        return;
+      }
+
+      // Both permissions granted
+      console.log("Audio and file system permissions granted");
+    } catch (error) {
+      console.error("Error getting permissions:", error);
     }
   };
 
@@ -104,16 +113,19 @@ const HomeScreen = () => {
         const uri = await temporary.getURI();
 
         // Create a recording object with name and uri
-        const recordingObject = { name: recordingName, uri };
+
+        const fileUri = `${FileSystem.documentDirectory}${recordingName}.wav`;
+        await FileSystem.moveAsync({ from: temporary.getURI(), to: fileUri });
+        const recordingObject = { name: recordingName, fileUri };
 
         // Save the recording object to AsyncStorage
-        await AsyncStorage.setItem(
-          "memorizedRecording",
-          JSON.stringify(recordingObject)
-        );
 
         // Add the recording object to the list of recordings
         setRecordingsList((prevList) => [...prevList, recordingObject]);
+        await AsyncStorage.setItem(
+          "memorizedRecords",
+          JSON.stringify(recordingsList)
+        );
 
         // Reset the recording name input
         setRecordingName("");
@@ -128,27 +140,41 @@ const HomeScreen = () => {
   };
   const loadMemorizedRecording = async () => {
     try {
-      const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
-      if (memorizedURI) {
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: memorizedURI },
-          {},
-          (status) => {
-            if (status.didJustFinish) {
-              const delayInSeconds =
-                delayUnit === "seconds"
-                  ? parseInt(repeatDelay)
-                  : parseInt(repeatDelay) * 60;
-              setTimeout(() => {
-                sound.replayAsync();
-              }, delayInSeconds * 1000);
+      // Read the list of recordings from AsyncStorage
+      const storedRecordings = await AsyncStorage.getItem("memorizedRecords");
+      console.log("jumara");
+      console.log(storedRecordings);
+
+      if (storedRecordings) {
+        // Parse the stored recordings
+        const recordings = JSON.parse(storedRecordings);
+        console.log(recordings);
+        // Update the recordingsList state with loaded recordings
+        setRecordingsList(recordings);
+        console.log(recordings);
+        // Play the last loaded recording, if any
+        if (recordings.length > 0) {
+          const lastRecording = recordings[recordings.length - 1];
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: lastRecording.uri },
+            {},
+            (status) => {
+              if (status.didJustFinish) {
+                const delayInSeconds =
+                  delayUnit === "seconds"
+                    ? parseInt(repeatDelay)
+                    : parseInt(repeatDelay) * 60;
+                setTimeout(() => {
+                  sound.replayAsync();
+                }, delayInSeconds * 1000);
+              }
             }
-          }
-        );
-        setSound(sound);
+          );
+          setSound(sound);
+        }
       }
     } catch (error) {
-      console.error("Error loading memorized recording:", error);
+      console.error("Error loading memorized recordings:", error);
     }
   };
 
@@ -206,6 +232,15 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.recordingsListContainer}>
+        <Text style={styles.recordingsListTitle}>Recordings List:</Text>
+        {recordingsList.map((recording, index) => (
+          <Text key={index} style={styles.recordingItem}>
+            {recording.name}
+          </Text>
+        ))}
+      </View>
+
       <Text style={styles.statusText}>
         {recording ? "Recording..." : "Not Recording"}
       </Text>
