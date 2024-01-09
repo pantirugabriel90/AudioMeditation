@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  AsyncStorage,
+} from "react-native";
 import { Audio } from "expo-av";
-import * as Permissions from "expo-permissions";
 
 const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [repeatDelay, setRepeatDelay] = useState("0");
+  const [delayUnit, setDelayUnit] = useState("seconds"); // Initial unit is seconds
 
   useEffect(() => {
     getPermissionsAsync();
+    loadMemorizedRecording();
   }, []);
 
   const getPermissionsAsync = async () => {
@@ -17,32 +26,29 @@ const HomeScreen = () => {
     if (AudioPerm.status === "granted") {
       console.log("Audio Permission Granted");
     }
-    // const { status } = await Permissions.askAsync(
-    //   Permissions.AUDIO_RECORDING,
-    //   Permissions.AUDIO_PLAYBACK
-    // );
-    // if (status !== "granted") {
-    //   console.error("Audio permissions not granted!");
-    // }
   };
 
   const toggleRecording = async () => {
     try {
       if (recording) {
-        // Dacă înregistrează, oprește și descarcă
         await recording.stopAndUnloadAsync();
         const { sound } = await recording.createNewLoadedSoundAsync(
           {},
           (status) => {
             if (status.didJustFinish) {
-              sound.replayAsync();
+              const delayInSeconds =
+                delayUnit === "seconds"
+                  ? parseInt(repeatDelay)
+                  : parseInt(repeatDelay) * 60;
+              setTimeout(() => {
+                sound.replayAsync();
+              }, delayInSeconds * 1000);
             }
           }
         );
         setSound(sound);
         setRecording(null);
       } else {
-        // Dacă nu înregistrează, începe înregistrarea
         const recordingObj = new Audio.Recording();
         await recordingObj.prepareToRecordAsync(
           Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
@@ -82,6 +88,49 @@ const HomeScreen = () => {
     }
   };
 
+  const memorizeRecording = async () => {
+    try {
+      if (recording) {
+        const uri = await recording.getURI();
+        await AsyncStorage.setItem("memorizedRecording", uri);
+        console.log("Recording memorized:", uri);
+      }
+    } catch (error) {
+      console.error("Error memorizing recording:", error);
+    }
+  };
+
+  const loadMemorizedRecording = async () => {
+    try {
+      const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
+      if (memorizedURI) {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: memorizedURI },
+          {},
+          (status) => {
+            if (status.didJustFinish) {
+              const delayInSeconds =
+                delayUnit === "seconds"
+                  ? parseInt(repeatDelay)
+                  : parseInt(repeatDelay) * 60;
+              setTimeout(() => {
+                sound.replayAsync();
+              }, delayInSeconds * 1000);
+            }
+          }
+        );
+        setSound(sound);
+      }
+    } catch (error) {
+      console.error("Error loading memorized recording:", error);
+    }
+  };
+
+  const saveDelay = () => {
+    // You can add additional validation here if needed
+    console.log(`Delay: ${repeatDelay} ${delayUnit}`);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.statusText}>
@@ -90,7 +139,6 @@ const HomeScreen = () => {
       <TouchableOpacity
         style={[styles.button, styles.recordButton]}
         onPress={toggleRecording}
-        // disabled={isPlaying}
       >
         <Text style={styles.buttonText}>
           {recording ? "Stop Recording" : "Start Recording"}
@@ -99,9 +147,41 @@ const HomeScreen = () => {
       <TouchableOpacity
         style={[styles.button, styles.playButton]}
         onPress={togglePlayStop}
-        // disabled={recording}
       >
         <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
+      </TouchableOpacity>
+      <View style={styles.delayContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter delay"
+          keyboardType="numeric"
+          value={repeatDelay}
+          onChangeText={(text) => setRepeatDelay(text)}
+        />
+        <TouchableOpacity
+          style={styles.unitButton}
+          onPress={() =>
+            setDelayUnit((prevUnit) =>
+              prevUnit === "seconds" ? "minutes" : "seconds"
+            )
+          }
+        >
+          <Text style={styles.buttonText}>
+            {delayUnit === "seconds" ? "Minutes" : "Seconds"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={[styles.button, styles.memorizeButton]}
+        onPress={memorizeRecording}
+      >
+        <Text style={styles.buttonText}>Memorize Recording</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.saveButton]}
+        onPress={saveDelay}
+      >
+        <Text style={styles.buttonText}>Save Delay</Text>
       </TouchableOpacity>
     </View>
   );
@@ -129,10 +209,34 @@ const styles = StyleSheet.create({
   playButton: {
     backgroundColor: "#00ff00",
   },
+  memorizeButton: {
+    backgroundColor: "#0000ff",
+  },
+  saveButton: {
+    backgroundColor: "#ffcc00",
+  },
+  unitButton: {
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+    backgroundColor: "#cccccc",
+  },
   buttonText: {
     color: "#ffffff",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 10,
+    textAlign: "center",
+  },
+  delayContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 
