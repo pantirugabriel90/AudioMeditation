@@ -11,11 +11,14 @@ import { Audio } from "expo-av";
 
 const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
+  const [temporary, setTemporary] = useState(null);
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatDelay, setRepeatDelay] = useState("0");
   const [delayUnit, setDelayUnit] = useState("seconds"); // Initial unit is seconds
   const [recordingsList, setRecordingsList] = useState([]);
+  const [recordingName, setRecordingName] = useState("");
+
   useEffect(() => {
     getPermissionsAsync();
     loadMemorizedRecording();
@@ -48,6 +51,7 @@ const HomeScreen = () => {
           }
         );
         setSound(sound);
+        setTemporary(recording);
         setRecording(null);
       } else {
         const recordingObj = new Audio.Recording();
@@ -91,20 +95,37 @@ const HomeScreen = () => {
 
   const memorizeRecording = async () => {
     try {
-      if (recording) {
-        const uri = await recording.getURI();
-        await AsyncStorage.setItem("memorizedRecording", uri);
+      if (temporary) {
+        if (!recordingName.trim()) {
+          alert("Please enter a name for the recording.");
+          return;
+        }
 
-        // Adăugați înregistrarea la lista de înregistrări
-        setRecordingsList((prevList) => [...prevList, uri]);
+        const uri = await temporary.getURI();
 
-        console.log("Recording memorized:", uri);
+        // Create a recording object with name and uri
+        const recordingObject = { name: recordingName, uri };
+
+        // Save the recording object to AsyncStorage
+        await AsyncStorage.setItem(
+          "memorizedRecording",
+          JSON.stringify(recordingObject)
+        );
+
+        // Add the recording object to the list of recordings
+        setRecordingsList((prevList) => [...prevList, recordingObject]);
+
+        // Reset the recording name input
+        setRecordingName("");
+
+        console.log("Recording memorized:", recordingObject);
+      } else {
+        console.log("recording is null");
       }
     } catch (error) {
       console.error("Error memorizing recording:", error);
     }
   };
-
   const loadMemorizedRecording = async () => {
     try {
       const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
@@ -235,6 +256,12 @@ const HomeScreen = () => {
       >
         <Text style={styles.buttonText}>Memorize Recording</Text>
       </TouchableOpacity>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter recording name"
+        value={recordingName}
+        onChangeText={(text) => setRecordingName(text)}
+      />
     </View>
   );
 };
