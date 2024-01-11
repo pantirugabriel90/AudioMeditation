@@ -10,6 +10,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import { RadioButton } from "react-native-paper";
 
 const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
@@ -245,6 +246,7 @@ const HomeScreen = () => {
         >
           <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
         </TouchableOpacity>
+
         <View style={styles.delayContainer}>
           <TextInput
             style={styles.input}
@@ -253,18 +255,20 @@ const HomeScreen = () => {
             value={repeatDelay}
             onChangeText={(text) => setRepeatDelay(text)}
           />
-          <TouchableOpacity
-            style={styles.unitButton}
-            onPress={() =>
-              setDelayUnit((prevUnit) =>
-                prevUnit === "seconds" ? "minutes" : "seconds"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>
-              {delayUnit === "seconds" ? "Minutes" : "Seconds"}
-            </Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <RadioButton
+              value="seconds"
+              status={delayUnit === "seconds" ? "checked" : "unchecked"}
+              onPress={() => setDelayUnit("seconds")}
+              color="#ffcc00"
+            />
+            <RadioButton
+              value="minutes"
+              status={delayUnit === "minutes" ? "checked" : "unchecked"}
+              onPress={() => setDelayUnit("minutes")}
+              color="#ffcc00"
+            />
+          </View>
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={saveDelay}
@@ -272,57 +276,36 @@ const HomeScreen = () => {
             <Text style={styles.buttonText}>Save Delay</Text>
           </TouchableOpacity>
         </View>
+
         <TouchableOpacity
           style={[styles.button, styles.memorizeButton]}
           onPress={memorizeRecording}
         >
           <Text style={styles.buttonText}>Memorize Recording</Text>
         </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter recording name"
-          value={recordingName}
-          onChangeText={(text) => setRecordingName(text)}
-        />
       </View>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  recordingsListContainer: {
-    marginBottom: 20,
-  },
-  recordingsListTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#ffffff",
-  },
-  recordingItem: {
-    fontSize: 16,
-    color: "#ffffff",
-    marginBottom: 5,
   },
   statusText: {
     fontSize: 18,
     marginBottom: 20,
-    color: "#ffffff",
   },
   button: {
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
     alignItems: "center",
+  },
+  enterButton: {
+    backgroundColor: "#ffcc00",
   },
   recordButton: {
     backgroundColor: "#ff0000",
@@ -336,12 +319,6 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: "#ffcc00",
   },
-  unitButton: {
-    padding: 10,
-    borderRadius: 5,
-    marginLeft: 10,
-    backgroundColor: "#cccccc",
-  },
   buttonText: {
     color: "#ffffff",
     fontWeight: "bold",
@@ -351,15 +328,45 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    width: -70,
     marginBottom: 10,
     padding: 10,
     textAlign: "center",
-    color: "#ffffff",
   },
   delayContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  radioContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  radioButton: {
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+    backgroundColor: "#cccccc",
+  },
+  radioButtonSelected: {
+    backgroundColor: "#ffcc00",
+  },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  recordingsListContainer: {
+    marginBottom: 20,
+  },
+  recordingsListTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  recordingItem: {
+    fontSize: 16,
+    marginBottom: 5,
   },
 });
 
