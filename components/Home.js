@@ -5,9 +5,10 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  ImageBackground,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Updated import
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 
 const HomeScreen = () => {
@@ -16,7 +17,7 @@ const HomeScreen = () => {
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatDelay, setRepeatDelay] = useState("0");
-  const [delayUnit, setDelayUnit] = useState("seconds"); // Initial unit is seconds
+  const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
 
@@ -27,14 +28,11 @@ const HomeScreen = () => {
 
   const getPermissionsAsync = async () => {
     try {
-      // Request audio permissions
       const audioPermission = await Audio.requestPermissionsAsync();
       if (audioPermission.status !== "granted") {
         console.log("Audio permission not granted");
         return;
       }
-
-      // Both permissions granted
       console.log("Audio and file system permissions granted");
     } catch (error) {
       console.error("Error getting permissions:", error);
@@ -112,24 +110,18 @@ const HomeScreen = () => {
 
         const uri = await temporary.getURI();
 
-        // Create a recording object with name and uri
-
         const fileUri = `${FileSystem.documentDirectory}${recordingName}.wav`;
-        await FileSystem.moveAsync({ from: temporary.getURI(), to: fileUri });
+        await FileSystem.moveAsync({ from: uri, to: fileUri });
         const recordingObject = { name: recordingName, fileUri };
 
-        // Save the recording object to AsyncStorage
-
-        // Add the recording object to the list of recordings
         setRecordingsList((prevList) => [...prevList, recordingObject]);
+
         await AsyncStorage.setItem(
           "memorizedRecords",
-          JSON.stringify(recordingsList)
+          JSON.stringify([...recordingsList, recordingObject])
         );
 
-        // Reset the recording name input
         setRecordingName("");
-
         console.log("Recording memorized:", recordingObject);
       } else {
         console.log("recording is null");
@@ -138,25 +130,19 @@ const HomeScreen = () => {
       console.error("Error memorizing recording:", error);
     }
   };
+
   const loadMemorizedRecording = async () => {
     try {
-      // Read the list of recordings from AsyncStorage
       const storedRecordings = await AsyncStorage.getItem("memorizedRecords");
-      console.log("jumara");
-      console.log(storedRecordings);
 
       if (storedRecordings) {
-        // Parse the stored recordings
         const recordings = JSON.parse(storedRecordings);
-        console.log(recordings);
-        // Update the recordingsList state with loaded recordings
         setRecordingsList(recordings);
-        console.log(recordings);
-        // Play the last loaded recording, if any
+
         if (recordings.length > 0) {
           const lastRecording = recordings[recordings.length - 1];
           const { sound } = await Audio.Sound.createAsync(
-            { uri: lastRecording.uri },
+            { uri: lastRecording.fileUri },
             {},
             (status) => {
               if (status.didJustFinish) {
@@ -185,11 +171,9 @@ const HomeScreen = () => {
         const { repeatDelay: savedRepeatDelay, delayUnit: savedDelayUnit } =
           JSON.parse(delaySettings);
 
-        // Update state with saved delay and unit
         setRepeatDelay(savedRepeatDelay);
         setDelayUnit(savedDelayUnit);
 
-        // Replay the recording with the updated delay
         const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
         if (memorizedURI) {
           const { sound } = await Audio.Sound.createAsync(
@@ -217,13 +201,11 @@ const HomeScreen = () => {
 
   const saveDelay = async () => {
     try {
-      // Save the delay and unit to AsyncStorage
       await AsyncStorage.setItem(
         "delaySettings",
         JSON.stringify({ repeatDelay, delayUnit })
       );
 
-      // Replay the recording immediately with the new delay
       replayRecording();
     } catch (error) {
       console.error("Error saving delay settings:", error);
@@ -231,85 +213,110 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.recordingsListContainer}>
-        <Text style={styles.recordingsListTitle}>Recordings List:</Text>
-        {recordingsList.map((recording, index) => (
-          <Text key={index} style={styles.recordingItem}>
-            {recording.name}
-          </Text>
-        ))}
-      </View>
+    <ImageBackground
+      source={require("../assets/medit.jpg")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.recordingsListContainer}>
+          <Text style={styles.recordingsListTitle}>Recordings List:</Text>
+          {recordingsList.map((recording, index) => (
+            <Text key={index} style={styles.recordingItem}>
+              {recording.name}
+            </Text>
+          ))}
+        </View>
 
-      <Text style={styles.statusText}>
-        {recording ? "Recording..." : "Not Recording"}
-      </Text>
-      <TouchableOpacity
-        style={[styles.button, styles.recordButton]}
-        onPress={toggleRecording}
-      >
-        <Text style={styles.buttonText}>
-          {recording ? "Stop Recording" : "Start Recording"}
+        <Text style={styles.statusText}>
+          {recording ? "Recording..." : "Not Recording"}
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, styles.playButton]}
-        onPress={togglePlayStop}
-      >
-        <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
-      </TouchableOpacity>
-      <View style={styles.delayContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter delay"
-          keyboardType="numeric"
-          value={repeatDelay}
-          onChangeText={(text) => setRepeatDelay(text)}
-        />
         <TouchableOpacity
-          style={styles.unitButton}
-          onPress={() =>
-            setDelayUnit((prevUnit) =>
-              prevUnit === "seconds" ? "minutes" : "seconds"
-            )
-          }
+          style={[styles.button, styles.recordButton]}
+          onPress={toggleRecording}
         >
           <Text style={styles.buttonText}>
-            {delayUnit === "seconds" ? "Minutes" : "Seconds"}
+            {recording ? "Stop Recording" : "Start Recording"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, styles.saveButton]}
-          onPress={saveDelay}
+          style={[styles.button, styles.playButton]}
+          onPress={togglePlayStop}
         >
-          <Text style={styles.buttonText}>Save Delay</Text>
+          <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
         </TouchableOpacity>
+        <View style={styles.delayContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter delay"
+            keyboardType="numeric"
+            value={repeatDelay}
+            onChangeText={(text) => setRepeatDelay(text)}
+          />
+          <TouchableOpacity
+            style={styles.unitButton}
+            onPress={() =>
+              setDelayUnit((prevUnit) =>
+                prevUnit === "seconds" ? "minutes" : "seconds"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>
+              {delayUnit === "seconds" ? "Minutes" : "Seconds"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.saveButton]}
+            onPress={saveDelay}
+          >
+            <Text style={styles.buttonText}>Save Delay</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, styles.memorizeButton]}
+          onPress={memorizeRecording}
+        >
+          <Text style={styles.buttonText}>Memorize Recording</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter recording name"
+          value={recordingName}
+          onChangeText={(text) => setRecordingName(text)}
+        />
       </View>
-      <TouchableOpacity
-        style={[styles.button, styles.memorizeButton]}
-        onPress={memorizeRecording}
-      >
-        <Text style={styles.buttonText}>Memorize Recording</Text>
-      </TouchableOpacity>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter recording name"
-        value={recordingName}
-        onChangeText={(text) => setRecordingName(text)}
-      />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  recordingsListContainer: {
+    marginBottom: 20,
+  },
+  recordingsListTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#ffffff",
+  },
+  recordingItem: {
+    fontSize: 16,
+    color: "#ffffff",
+    marginBottom: 5,
   },
   statusText: {
     fontSize: 18,
     marginBottom: 20,
+    color: "#ffffff",
   },
   button: {
     padding: 15,
@@ -344,9 +351,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
+    width: -70,
     marginBottom: 10,
     padding: 10,
     textAlign: "center",
+    color: "#ffffff",
   },
   delayContainer: {
     flexDirection: "row",
