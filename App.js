@@ -30,7 +30,15 @@ const App = () => {
             ),
           }}
         />
-        <Tab.Screen name="Settings" component={Settings} />
+        <Tab.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ios-settings" size={24} color={color} />
+            ),
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );

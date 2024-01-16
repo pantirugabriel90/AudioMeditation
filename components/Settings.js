@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  Image,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 
@@ -26,12 +27,34 @@ const Settings = ({ sound }) => {
     }
   };
 
-  const changeBackgroundColor = (imageNumber) => {
-    setSelectedImage(imageNumber);
+  const getBackgroundImage = (imageNumber) => {
+    switch (imageNumber) {
+      case 1:
+        return require("../assets/image1.jpg");
 
+        break;
+      case 2:
+        return require("../assets/image2.jpg");
+        break;
+      case 3:
+        return require("../assets/image3.jpg");
+        break;
+      case 4:
+        return require("../assets/image4.jpg");
+        break;
+      case 5:
+        return require("../assets/image5.jpg");
+        break;
+      default:
+        return require("../assets/medit.jpg");
+    }
+  };
+
+  const changeBackgroundColor = (imageNumber) => {
     switch (imageNumber) {
       case 1:
         setBackgroundImage(require("../assets/image1.jpg"));
+
         break;
       case 2:
         setBackgroundImage(require("../assets/image2.jpg"));
@@ -64,7 +87,13 @@ const Settings = ({ sound }) => {
               status={selectedImage === imageNumber ? "checked" : "unchecked"}
               onPress={() => changeBackgroundColor(imageNumber)}
             />
+
             <Text style={styles.radioButtonText}>{`Image ${imageNumber}`}</Text>
+
+            <Image
+              source={getBackgroundImage(imageNumber)}
+              style={styles.icon}
+            />
           </View>
         ))}
       </View>
@@ -73,6 +102,11 @@ const Settings = ({ sound }) => {
 };
 
 const styles = StyleSheet.create({
+  icon: {
+    width: 100,
+    height: 60,
+    marginRight: 10, // Adjust as needed
+  },
   background: {
     flex: 1,
     justifyContent: "center",
