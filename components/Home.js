@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
   ImageBackground,
+  Image,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -220,6 +221,15 @@ const HomeScreen = () => {
       resizeMode="cover"
     >
       <View style={styles.container}>
+        {/* Home Section */}
+        <TouchableOpacity>
+          <Image
+            source={require("../assets/imagess.jpg")}
+            style={styles.icon}
+          />
+          <Text style={styles.homeText}>Home</Text>
+        </TouchableOpacity>
+
         <View style={styles.recordingsListContainer}>
           <Text style={styles.recordingsListTitle}>Recordings List:</Text>
           {recordingsList.map((recording, index) => (
@@ -293,6 +303,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    textAlign: "center", // Add this line
+  },
+  homeText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 10, // Adjust as needed
   },
   statusText: {
     fontSize: 18,
