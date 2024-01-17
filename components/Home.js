@@ -254,10 +254,11 @@ const HomeScreen = () => {
           {recordingsList.map((recording, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.recordingItemContainer}
               onPress={() => replayRecording(recording)}
             >
-              <Text style={styles.recordingItem}>{recording.name}</Text>
+              <View style={styles.recordingItemContainer}>
+                <Text style={styles.recordingItem}>{recording.name}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00ff00",
   },
   memorizeButton: {
-    backgroundColor: "#0000ff",
+    backgroundColor: "#ff00ff",
   },
   saveButton: {
     backgroundColor: "#ffcc00",
@@ -365,8 +366,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   input: {
+    backgroundColor: "pink",
     height: 40,
-    borderColor: "gray",
+    borderColor: "green",
     borderWidth: 1,
     marginBottom: 10,
     padding: 10,
@@ -411,7 +413,12 @@ const styles = StyleSheet.create({
   },
   recordingItemContainer: {
     marginLeft: 29,
-    backgroundColor: "yellow",
+    padding: 5,
+    paddingLeft: 15,
+    paddingRight: 15,
+    backgroundColor: "white",
+    margin: 5,
+    borderRadius: 10,
   },
 });
 
