@@ -14,6 +14,15 @@ const App = () => {
       <Tab.Navigator
         screenOptions={{
           headerTitleAlign: "center",
+          tabBarActiveBackgroundColor: "purple",
+          activeColor: "white",
+          inactiveColor: "purple",
+          tabBarActiveTintColor: "white", // Set active color to red
+          tabBarInactiveTintColor: "purple", // Set inactive color to white
+          tabBarLabelStyle: {
+            fontSize: 9.6, // Adjust the font size as needed
+            fontWeight: "400",
+          },
         }}
       >
         <Tab.Screen
@@ -36,7 +45,7 @@ const App = () => {
             ),
             tabBarLabel: "Home",
             tabBarLabelStyle: {
-              color: "green",
+              color: "black",
             },
             tabBarStyle: {
               alignItems: "center",
@@ -59,7 +68,7 @@ const App = () => {
             ),
             tabBarLabel: "Repeat",
             tabBarLabelStyle: {
-              color: "green",
+              color: "black",
             },
             tabBarStyle: {
               alignItems: "center",
@@ -83,7 +92,7 @@ const App = () => {
             ),
             tabBarLabel: "Settings",
             tabBarLabelStyle: {
-              color: "green",
+              color: "black",
             },
             tabBarStyle: {
               alignItems: "center",
