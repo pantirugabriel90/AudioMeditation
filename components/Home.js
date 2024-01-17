@@ -58,6 +58,8 @@ const HomeScreen = () => {
 
   const toggleRecording = async () => {
     try {
+      await stopSound();
+      if (sound) await sound.stopAsync();
       if (recording) {
         await recording.stopAndUnloadAsync();
         const { sound } = await recording.createNewLoadedSoundAsync(
@@ -92,14 +94,17 @@ const HomeScreen = () => {
 
   const togglePlayStop = async () => {
     try {
-      if (sound) {
-        if (isPlaying) {
-          await sound.stopAsync();
-        } else {
-          await sound.replayAsync();
-        }
-        setIsPlaying(!isPlaying);
+      //if (sound) {
+      console.log("isPlaying");
+      console.log(isPlaying);
+      if (isPlaying) {
+        await stopSound();
+        await sound.stopAsync();
+      } else {
+        await sound.replayAsync();
       }
+      setIsPlaying(!isPlaying);
+      //   }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -139,7 +144,6 @@ const HomeScreen = () => {
         );
 
         setRecordingName("");
-        console.log("Recording memorized:", recordingObject);
       } else {
         console.log("recording is null");
       }
@@ -150,6 +154,8 @@ const HomeScreen = () => {
 
   const loadMemorizedRecording = async () => {
     try {
+      await stopSound();
+      if (sound) await sound.stopAsync();
       const storedRecordings = await AsyncStorage.getItem("memorizedRecords");
 
       if (storedRecordings) {
@@ -181,8 +187,10 @@ const HomeScreen = () => {
     }
   };
 
-  const replayRecording = async () => {
+  const replayRecording = async (specificRecording) => {
     try {
+      await stopSound();
+      if (sound) await sound.stopAsync();
       const delaySettings = await AsyncStorage.getItem("delaySettings");
       if (delaySettings) {
         const { repeatDelay: savedRepeatDelay, delayUnit: savedDelayUnit } =
@@ -190,8 +198,12 @@ const HomeScreen = () => {
 
         setRepeatDelay(savedRepeatDelay);
         setDelayUnit(savedDelayUnit);
+        console.log("specificRecording");
+        console.log(specificRecording);
+        let memorizedURI = specificRecording
+          ? specificRecording.fileUri
+          : await AsyncStorage.getItem("memorizedRecording");
 
-        const memorizedURI = await AsyncStorage.getItem("memorizedRecording");
         if (memorizedURI) {
           const { sound } = await Audio.Sound.createAsync(
             { uri: memorizedURI },
@@ -208,6 +220,7 @@ const HomeScreen = () => {
               }
             }
           );
+
           setSound(sound);
         }
       }
@@ -248,9 +261,13 @@ const HomeScreen = () => {
         <View style={styles.recordingsListContainer}>
           <Text style={styles.recordingsListTitle}>Recordings List:</Text>
           {recordingsList.map((recording, index) => (
-            <Text key={index} style={styles.recordingItem}>
-              {recording.name}
-            </Text>
+            <TouchableOpacity
+              key={index}
+              style={styles.recordingItemContainer}
+              onPress={() => replayRecording(recording)}
+            >
+              <Text style={styles.recordingItem}>{recording.name}</Text>
+            </TouchableOpacity>
           ))}
         </View>
 
@@ -301,7 +318,12 @@ const HomeScreen = () => {
             <Text style={styles.buttonText}>Save Delay</Text>
           </TouchableOpacity>
         </View>
-
+        <TextInput
+          style={styles.input}
+          placeholder="Enter recording name"
+          value={recordingName}
+          onChangeText={(text) => setRecordingName(text)}
+        />
         <TouchableOpacity
           style={[styles.button, styles.memorizeButton]}
           onPress={memorizeRecording}
