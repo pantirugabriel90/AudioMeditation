@@ -5,6 +5,7 @@ import HomeScreen from "./components/Home";
 import SecondScreen from "./components/SecondScreen";
 import { Ionicons } from "@expo/vector-icons";
 import Settings from "./components/Settings";
+import Tutorial from "./components/Tutorial";
 
 const Tab = createBottomTabNavigator();
 
@@ -33,6 +34,15 @@ const App = () => {
         <Tab.Screen
           name="Settings"
           component={Settings}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ios-settings" size={24} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="tutorial"
+          component={Tutorial}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ios-settings" size={24} color={color} />
