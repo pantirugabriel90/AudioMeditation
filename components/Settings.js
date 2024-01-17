@@ -15,6 +15,7 @@ import {
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
 
+import { useFocusEffect } from "@react-navigation/native";
 const Settings = ({ sound }) => {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")

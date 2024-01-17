@@ -8,10 +8,16 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import { RadioButton } from "react-native-paper";
+import {
+  saveSelectedImage,
+  loadSelectedImage,
+  getBackgroundImage,
+} from "../Utils/BackgroundUtils";
 
 const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
@@ -22,12 +28,21 @@ const HomeScreen = () => {
   const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState(
+    require("../assets/medit.jpg")
+  );
 
   useEffect(() => {
     getPermissionsAsync();
     loadMemorizedRecording();
   }, []);
-
+  useFocusEffect(() => {
+    loadSelectedImage().then((storedImage) => {
+      if (storedImage !== null) {
+        setBackgroundImage(getBackgroundImage(storedImage));
+      }
+    });
+  });
   const getPermissionsAsync = async () => {
     try {
       const audioPermission = await Audio.requestPermissionsAsync();
@@ -216,7 +231,7 @@ const HomeScreen = () => {
 
   return (
     <ImageBackground
-      source={require("../assets/medit.jpg")}
+      source={backgroundImage}
       style={styles.background}
       resizeMode="cover"
     >

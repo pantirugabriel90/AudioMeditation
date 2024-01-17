@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,25 @@ import {
   ImageBackground,
 } from "react-native";
 
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  saveSelectedImage,
+  loadSelectedImage,
+  getBackgroundImage,
+} from "../Utils/BackgroundUtils";
 const SecondScreen = ({ sound }) => {
   const [backgroundColor, setBackgroundColor] = useState("#ff9900");
+  const [backgroundImage, setBackgroundImage] = useState(
+    require("../assets/medit.jpg")
+  );
+  useFocusEffect(() => {
+    // Load the selected image path from local storage when component mounts
+    loadSelectedImage().then((storedImage) => {
+      if (storedImage !== null) {
+        setBackgroundImage(getBackgroundImage(storedImage));
+      }
+    });
+  });
 
   const startRepeat = async () => {
     try {
@@ -32,7 +49,7 @@ const SecondScreen = ({ sound }) => {
 
   return (
     <ImageBackground
-      source={require("../assets/medit.jpg")}
+      source={backgroundImage}
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
