@@ -407,6 +407,11 @@ const styles = StyleSheet.create({
   recordingItem: {
     fontSize: 16,
     marginBottom: 5,
+    color: "green",
+  },
+  recordingItemContainer: {
+    marginLeft: 29,
+    backgroundColor: "yellow",
   },
 });
 
