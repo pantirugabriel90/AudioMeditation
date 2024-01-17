@@ -12,6 +12,8 @@ export const saveSelectedImage = async (imageNumber) => {
 export const loadSelectedImage = async () => {
   try {
     const storedImage = await AsyncStorage.getItem("selectedImage");
+    console.log("storedimage\n");
+    console.log(storedImage);
     return storedImage ? parseInt(storedImage, 10) : null;
   } catch (error) {
     console.error("Error loading selected image:", error);

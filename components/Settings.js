@@ -9,6 +9,11 @@ import {
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  saveSelectedImage,
+  loadSelectedImage,
+  getBackgroundImage,
+} from "../Utils/BackgroundUtils";
 
 const Settings = ({ sound }) => {
   const [backgroundImage, setBackgroundImage] = useState(
@@ -18,29 +23,13 @@ const Settings = ({ sound }) => {
 
   useEffect(() => {
     // Load the selected image path from local storage when component mounts
-    loadSelectedImage();
-  }, []);
-
-  const loadSelectedImage = async () => {
-    try {
-      const storedImage = await AsyncStorage.getItem("selectedImage");
-      if (storedImage) {
-        setSelectedImage(parseInt(storedImage, 10));
-        setBackgroundImage(getBackgroundImage(parseInt(storedImage, 10)));
+    loadSelectedImage().then((storedImage) => {
+      if (storedImage !== null) {
+        setSelectedImage(storedImage);
+        setBackgroundImage(getBackgroundImage(storedImage));
       }
-    } catch (error) {
-      console.error("Error loading selected image:", error);
-    }
-  };
-
-  const saveSelectedImage = async (imageNumber) => {
-    try {
-      // Save the selected image path to local storage
-      await AsyncStorage.setItem("selectedImage", imageNumber.toString());
-    } catch (error) {
-      console.error("Error saving selected image:", error);
-    }
-  };
+    });
+  }, []);
 
   const startRepeat = async () => {
     try {
@@ -51,29 +40,6 @@ const Settings = ({ sound }) => {
       }
     } catch (error) {
       console.error("Error starting repeat:", error);
-    }
-  };
-
-  const getBackgroundImage = (imageNumber) => {
-    switch (imageNumber) {
-      case 1:
-        return require("../assets/image1.jpg");
-
-        break;
-      case 2:
-        return require("../assets/image2.jpg");
-        break;
-      case 3:
-        return require("../assets/image3.jpg");
-        break;
-      case 4:
-        return require("../assets/image4.jpg");
-        break;
-      case 5:
-        return require("../assets/image5.jpg");
-        break;
-      default:
-        return require("../assets/medit.jpg");
     }
   };
 
