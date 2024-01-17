@@ -266,22 +266,28 @@ const HomeScreen = () => {
             </TouchableOpacity>
           ))}
         </View>
-
-        <TouchableOpacity
-          style={[styles.button, styles.recordButton]}
-          onPress={toggleRecording}
-        >
-          <Text style={styles.buttonText}>
-            {recording ? "Stop Recording" : "Start Recording"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.playButton]}
-          onPress={togglePlayStop}
-        >
-          <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
-        </TouchableOpacity>
-
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.button, styles.recordButton]}
+            onPress={toggleRecording}
+          >
+            <Text style={styles.buttonText}>
+              {recording ? "Stop Recording" : "Record"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.playButton]}
+            onPress={togglePlayStop}
+          >
+            <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.memorizeButton]}
+            onPress={memorizeRecording}
+          >
+            <Text style={styles.buttonText}>Save Recording</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.delayContainer}>
           <TextInput
             style={styles.input}
@@ -317,12 +323,6 @@ const HomeScreen = () => {
           value={recordingName}
           onChangeText={(text) => setRecordingName(text)}
         />
-        <TouchableOpacity
-          style={[styles.button, styles.memorizeButton]}
-          onPress={memorizeRecording}
-        >
-          <Text style={styles.buttonText}>Memorize Recording</Text>
-        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -334,6 +334,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center", // Add this line
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around", // You can also use 'space-between' or 'space-evenly'
   },
 
   statusText: {
@@ -354,9 +358,11 @@ const styles = StyleSheet.create({
   },
   playButton: {
     backgroundColor: "#00ff00",
+    marginLeft: 10,
   },
   memorizeButton: {
     backgroundColor: "#ff00ff",
+    marginLeft: 10,
   },
   saveButton: {
     backgroundColor: "#ffcc00",
