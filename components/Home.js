@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import commonStyles from "./CommonStyles";
 import { RadioButton } from "react-native-paper";
 import {
   saveSelectedImage,
@@ -241,7 +242,10 @@ const HomeScreen = () => {
       console.error("Error saving delay settings:", error);
     }
   };
-
+  <View style={commonStyles.centerContainer}>
+    <Text>Home</Text>
+    {/* Your Home screen content */}
+  </View>;
   return (
     <ImageBackground
       source={backgroundImage}
@@ -263,9 +267,6 @@ const HomeScreen = () => {
           ))}
         </View>
 
-        <Text style={styles.statusText}>
-          {recording ? "Recording..." : "Not Recording"}
-        </Text>
         <TouchableOpacity
           style={[styles.button, styles.recordButton]}
           onPress={toggleRecording}
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
-    fontSize: 18,
+    fontSize: 25,
     marginBottom: 20,
   },
   button: {
@@ -363,7 +364,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontWeight: "bold",
-    textAlign: "center",
+    textAlign: "left",
+    flexDirection: "row",
   },
   input: {
     backgroundColor: "pink",

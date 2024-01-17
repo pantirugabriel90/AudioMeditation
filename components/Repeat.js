@@ -13,8 +13,8 @@ import {
   loadSelectedImage,
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
-const SecondScreen = ({ sound }) => {
-  const [backgroundColor, setBackgroundColor] = useState("#ff9900");
+const Repeat = ({ sound }) => {
+  const [backgroundColor, setBackgroundColor] = useState("black");
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
@@ -90,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SecondScreen;
+export default Repeat;
