@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,39 @@ import {
   Image,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Settings = ({ sound }) => {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
   const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    // Load the selected image path from local storage when component mounts
+    loadSelectedImage();
+  }, []);
+
+  const loadSelectedImage = async () => {
+    try {
+      const storedImage = await AsyncStorage.getItem("selectedImage");
+      if (storedImage) {
+        setSelectedImage(parseInt(storedImage, 10));
+        setBackgroundImage(getBackgroundImage(parseInt(storedImage, 10)));
+      }
+    } catch (error) {
+      console.error("Error loading selected image:", error);
+    }
+  };
+
+  const saveSelectedImage = async (imageNumber) => {
+    try {
+      // Save the selected image path to local storage
+      await AsyncStorage.setItem("selectedImage", imageNumber.toString());
+    } catch (error) {
+      console.error("Error saving selected image:", error);
+    }
+  };
 
   const startRepeat = async () => {
     try {
@@ -51,26 +78,10 @@ const Settings = ({ sound }) => {
   };
 
   const changeBackgroundColor = (imageNumber) => {
-    switch (imageNumber) {
-      case 1:
-        setBackgroundImage(require("../assets/image1.jpg"));
-
-        break;
-      case 2:
-        setBackgroundImage(require("../assets/image2.jpg"));
-        break;
-      case 3:
-        setBackgroundImage(require("../assets/image3.jpg"));
-        break;
-      case 4:
-        setBackgroundImage(require("../assets/image4.jpg"));
-        break;
-      case 5:
-        setBackgroundImage(require("../assets/image5.jpg"));
-        break;
-      default:
-        setBackgroundImage(require("../assets/medit.jpg"));
-    }
+    // Set the selected image and save it to local storage
+    setSelectedImage(imageNumber);
+    setBackgroundImage(getBackgroundImage(imageNumber));
+    saveSelectedImage(imageNumber);
   };
 
   return (
