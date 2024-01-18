@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0077cc", // Adjust the color as needed
   },
   buttonText: {
-    color: "white",
+    color: "purple",
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -129,10 +129,11 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderWidth: 1,
     marginTop: "10%",
-    color: "white",
+    color: "purple",
     marginBottom: 30,
     borderRadius: 15,
     textAlign: "center",
+    backgroundColor: "white",
   },
 });
 

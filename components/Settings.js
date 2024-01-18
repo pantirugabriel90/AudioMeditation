@@ -87,20 +87,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: "white",
+    borderColor: "purple",
     borderRadius: 10,
+    padding: 15,
   },
   radioButton: {
-    marginRight: 55, //kk Adjust as needed
+    marginRight: 55,
+    //kk Adjust as needed
   },
   radioButtonText: {
     marginLeft: 55,
+    color: "red",
   },
 
   icon: {
+    marginLeft: 10,
     width: 50,
     height: 40,
-    marginRight: 10, // Adjust as needed
+    marginRight: 10,
+    borderRadius: 10, // Adjust as needed
   },
   background: {
     flex: 1,

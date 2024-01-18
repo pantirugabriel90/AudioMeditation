@@ -296,20 +296,28 @@ const HomeScreen = () => {
             value={repeatDelay}
             onChangeText={(text) => setRepeatDelay(text)}
           />
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <RadioButton
-              value="seconds"
-              status={delayUnit === "seconds" ? "checked" : "unchecked"}
-              onPress={() => setDelayUnit("seconds")}
-              color="#ffcc00"
-            />
-            <RadioButton
-              value="minutes"
-              status={delayUnit === "minutes" ? "checked" : "unchecked"}
-              onPress={() => setDelayUnit("minutes")}
-              color="#ffcc00"
-            />
+
+          <View>
+            <View style={styles.radioContainer}>
+              <RadioButton
+                value="minutes"
+                status={delayUnit === "minutes" ? "checked" : "unchecked"}
+                onPress={() => setDelayUnit("minutes")}
+                color="#ffcc00"
+              />
+              <Text style={styles.radioButtonLabel}>Minutes</Text>
+            </View>
+            <View style={styles.radioContainer}>
+              <RadioButton
+                value="seconds"
+                status={delayUnit === "seconds" ? "checked" : "unchecked"}
+                onPress={() => setDelayUnit("seconds")}
+                color="#ffcc00"
+              />
+              <Text style={styles.radioButtonLabel}>Seconds</Text>
+            </View>
           </View>
+
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={saveDelay}
@@ -329,6 +337,22 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  radioButtonLabel: {
+    marginLeft: 5,
+    backgroundColor: "white",
+    padding: 6,
+    borderRadius: 5,
+    color: "purple", // Adjust the color according to your design
+  },
+  style: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -376,7 +400,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "pink",
     height: 40,
-    borderColor: "green",
+    borderColor: "purple",
     borderWidth: 1,
     marginBottom: 10,
     padding: 10,
@@ -407,7 +431,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   recordingsListContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   recordingsListTitle: {
     fontSize: 20,
