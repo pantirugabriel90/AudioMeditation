@@ -14,6 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import commonStyles from "./CommonStyles";
 import { RadioButton } from "react-native-paper";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialIcons } from "@expo/vector-icons";
 import {
   saveSelectedImage,
   loadSelectedImage,
@@ -327,6 +329,13 @@ const HomeScreen = () => {
             >
               <View style={styles.recordingItemContainer}>
                 <Text style={styles.recordingItem}>{recording.name}</Text>
+
+                <Icon
+                  name="delete-forever"
+                  style={styles.deleteIcon}
+                  onPress={() => handleDeleteRecording(index)}
+                />
+                <Icon name="find-replace" size={24} color="black" />
               </View>
             </TouchableOpacity>
           ))}
@@ -355,7 +364,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: "flex-start",
+    justifyContent: "space-evenly",
     alignItems: "center",
     textAlign: "center", // Add this line
   },
@@ -371,8 +380,9 @@ const styles = StyleSheet.create({
   button: {
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     alignItems: "center",
+    marginLeft: 10,
   },
   enterButton: {
     backgroundColor: "#ffcc00",
@@ -411,10 +421,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 20,
+    marginRight: 5,
   },
   radioContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 5,
   },
   radioButton: {
     padding: 10,
@@ -431,25 +443,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   recordingsListContainer: {
-    marginBottom: 30,
+    marginBottom: -30,
+    alignItems: "right",
   },
   recordingsListTitle: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: "bold",
+    color: "pink",
   },
+  recordingItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+
   recordingItem: {
     fontSize: 16,
     marginBottom: 5,
     color: "green",
   },
-  recordingItemContainer: {
-    marginLeft: 29,
-    padding: 5,
-    paddingLeft: 15,
-    paddingRight: 15,
-    backgroundColor: "white",
-    margin: 5,
-    borderRadius: 10,
+
+  deleteIcon: {
+    color: "black",
+    fontSize: 20,
+    // Adjust spacing between delete and replace icons
+  },
+
+  replaceIcon: {
+    color: "blue", // Customize the color for the replacement icon
+    fontSize: 20,
   },
 });
 
