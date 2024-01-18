@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ImageBackground,
 } from "react-native";
-
+import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   saveSelectedImage,
@@ -16,6 +16,8 @@ import {
 } from "../Utils/BackgroundUtils";
 const Repeat = ({ sound }) => {
   const [backgroundColor, setBackgroundColor] = useState("black");
+
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
@@ -30,6 +32,15 @@ const Repeat = ({ sound }) => {
     });
   });
 
+  const speakText = () => {
+    if (inputText.trim() !== "") {
+      setIsSpeaking(true);
+      repeatInterval = setInterval(() => {
+        Speech.speak(inputText, { rate: 1 }); // Adjust the rate as needed
+      }, 0); // Repeat every 5 seconds, adjust as needed
+    }
+  };
+
   const startRepeat = async () => {
     try {
       if (sound) {
@@ -41,7 +52,10 @@ const Repeat = ({ sound }) => {
       console.error("Error starting repeat:", error);
     }
   };
-
+  const stopSpeaking = () => {
+    setIsSpeaking(false);
+    clearInterval(repeatInterval);
+  };
   const changeBackgroundColor = () => {
     // Implement your logic to change the background color
     // For simplicity, let's toggle between two colors
@@ -64,10 +78,15 @@ const Repeat = ({ sound }) => {
       />
       <View style={styles.container}>
         <TouchableOpacity
-          style={[styles.button, styles.repeatButton]}
-          onPress={startRepeat}
+          style={[
+            styles.button,
+            isSpeaking ? styles.stopButton : styles.textToSpeechButton,
+          ]}
+          onPress={isSpeaking ? stopSpeaking : speakText}
         >
-          <Text style={styles.buttonText}>Asculta pe Repeat</Text>
+          <Text style={styles.buttonText}>
+            {isSpeaking ? "Stop Speaking" : "Text to Speech"}
+          </Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -80,6 +99,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     alignItems: "center",
+  },
+  textToSpeechButton: {
+    backgroundColor: "#0077cc",
+  },
+  stopButton: {
+    backgroundColor: "#ff0000",
   },
   repeatButton: {
     backgroundColor: "#ff9900",
