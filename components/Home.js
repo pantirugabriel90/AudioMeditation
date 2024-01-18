@@ -23,6 +23,7 @@ import {
 } from "../Utils/BackgroundUtils";
 
 const HomeScreen = () => {
+  const [selectedRecordingIndex, setSelectedRecordingIndex] = useState(null);
   const [recording, setRecording] = useState(null);
   const [temporary, setTemporary] = useState(null);
   const [sound, setSound] = useState();
@@ -31,6 +32,7 @@ const HomeScreen = () => {
   const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
+
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
@@ -153,6 +155,15 @@ const HomeScreen = () => {
     } catch (error) {
       console.error("Error memorizing recording:", error);
     }
+  };
+
+  const handleDeleteRecording = (index) => {
+    const updatedRecordings = [...recordingsList];
+    updatedRecordings.splice(index, 1);
+    setRecordingsList(updatedRecordings);
+    setSelectedRecordingIndex(null); // Clear the selected index
+    // Perform any additional actions (e.g., delete the file, update storage, etc.)
+    // ...
   };
 
   const loadMemorizedRecording = async () => {
@@ -325,9 +336,14 @@ const HomeScreen = () => {
           {recordingsList.map((recording, index) => (
             <TouchableOpacity
               key={index}
-              onPress={() => replayRecording(recording)}
+              onPress={() => setSelectedRecordingIndex(index)}
             >
-              <View style={styles.recordingItemContainer}>
+              <View
+                style={[
+                  styles.recordingItemContainer,
+                  selectedRecordingIndex === index && styles.selectedRecording,
+                ]}
+              >
                 <Text style={styles.recordingItem}>{recording.name}</Text>
 
                 <Icon
@@ -335,7 +351,6 @@ const HomeScreen = () => {
                   style={styles.deleteIcon}
                   onPress={() => handleDeleteRecording(index)}
                 />
-                <Icon name="find-replace" size={24} color="black" />
               </View>
             </TouchableOpacity>
           ))}
@@ -352,6 +367,9 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 5,
     color: "purple", // Adjust the color according to your design
+  },
+  selectedRecording: {
+    backgroundColor: "lightblue", // Customize the background color for the selected recording
   },
   style: {
     height: 24,
@@ -456,6 +474,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 10,
+    paddingVertical: 5, // Adjust spacing for vertical alignment
+    backgroundColor: "white",
+    borderRadius: 5,
+    marginTop: 5,
   },
 
   recordingItem: {
@@ -473,6 +495,7 @@ const styles = StyleSheet.create({
   replaceIcon: {
     color: "blue", // Customize the color for the replacement icon
     fontSize: 20,
+    marginLeft: 10, // Adjust spacing between delete and replace icons
   },
 });
 
