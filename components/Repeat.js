@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   ImageBackground,
 } from "react-native";
@@ -18,6 +19,8 @@ const Repeat = ({ sound }) => {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
+
+  const [inputText, setInputText] = useState("");
   useFocusEffect(() => {
     // Load the selected image path from local storage when component mounts
     loadSelectedImage().then((storedImage) => {
@@ -53,7 +56,13 @@ const Repeat = ({ sound }) => {
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
-      <View>
+      <TextInput
+        style={styles.textInput}
+        value={inputText}
+        onChangeText={(text) => setInputText(text)}
+        placeholder="Enter your text here"
+      />
+      <View style={styles.container}>
         <TouchableOpacity
           style={[styles.button, styles.repeatButton]}
           onPress={startRepeat}
@@ -87,6 +96,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  textInput: {
+    width: "70%",
+    height: "25%",
+    borderColor: "white",
+    borderWidth: 1,
+    marginTop: "10%",
+    color: "white",
+    marginBottom: 30,
+    borderRadius: 15,
+    textAlign: "center",
   },
 });
 
