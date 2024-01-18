@@ -64,6 +64,7 @@ const Settings = ({ sound }) => {
               value={imageNumber}
               status={selectedImage === imageNumber ? "checked" : "unchecked"}
               onPress={() => changeBackgroundColor(imageNumber)}
+              style={styles.radioButton}
             />
 
             <Text style={styles.radioButtonText}>{`Image ${imageNumber}`}</Text>
@@ -80,9 +81,25 @@ const Settings = ({ sound }) => {
 };
 
 const styles = StyleSheet.create({
+  radioButtonContainer: {
+    backgroundColor: "white",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: "white",
+    borderRadius: 10,
+  },
+  radioButton: {
+    marginRight: 55, //kk Adjust as needed
+  },
+  radioButtonText: {
+    marginLeft: 55,
+  },
+
   icon: {
-    width: 100,
-    height: 60,
+    width: 50,
+    height: 40,
     marginRight: 10, // Adjust as needed
   },
   background: {
@@ -100,7 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff9900",
   },
   buttonText: {
-    color: "white",
+    color: "red",
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -108,11 +125,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     marginTop: 10,
     alignItems: "flex-start",
-  },
-  radioButtonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
   },
   radioButtonText: {
     marginLeft: 5,
