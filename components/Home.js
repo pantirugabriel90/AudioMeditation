@@ -253,19 +253,6 @@ const HomeScreen = () => {
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <View style={styles.recordingsListContainer}>
-          <Text style={styles.recordingsListTitle}>Recordings List:</Text>
-          {recordingsList.map((recording, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => replayRecording(recording)}
-            >
-              <View style={styles.recordingItemContainer}>
-                <Text style={styles.recordingItem}>{recording.name}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.button, styles.recordButton]}
@@ -331,6 +318,19 @@ const HomeScreen = () => {
           value={recordingName}
           onChangeText={(text) => setRecordingName(text)}
         />
+        <View style={styles.recordingsListContainer}>
+          <Text style={styles.recordingsListTitle}>Recordings List:</Text>
+          {recordingsList.map((recording, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => replayRecording(recording)}
+            >
+              <View style={styles.recordingItemContainer}>
+                <Text style={styles.recordingItem}>{recording.name}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </ImageBackground>
   );
