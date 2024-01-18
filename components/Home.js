@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     textAlign: "center", // Add this line
   },
@@ -434,9 +434,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   recordingsListTitle: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 10,
   },
   recordingItem: {
     fontSize: 16,
