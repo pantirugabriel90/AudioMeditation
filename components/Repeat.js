@@ -25,6 +25,7 @@ const Repeat = () => {
   const [inputText, setInputText] = useState("");
   const [spokenText, setSpokenText] = useState("");
   const [delayRepeat, setDelayRepeat] = useState(5);
+  const [speechRate, setSpeechRate] = useState(1);
 
   useFocusEffect(() => {
     loadSelectedImage().then((storedImage) => {
@@ -43,7 +44,7 @@ const Repeat = () => {
   const speakInLoop = async () => {
     if (isSpeaking) {
       await Speech.speak(spokenText, {
-        rate: 1,
+        rate: speechRate,
         onDone: () => {
           setTimeout(() => {
             speakInLoop();
@@ -55,8 +56,6 @@ const Repeat = () => {
   const speakText = async () => {
     if (inputText.trim() !== "") {
       setSpokenText(inputText);
-      setIsSpeaking(true);
-      console.log("blablabal" + isSpeaking);
     } else console.log("no text");
   };
 
@@ -88,6 +87,28 @@ const Repeat = () => {
         onChangeText={(text) => setInputText(text)}
         placeholder="Enter your text here"
       />
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Delay in seconds:</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.numberInput}
+            value={delayRepeat.toString()}
+            onChangeText={(text) => setDelayRepeat(parseInt(text))}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Speech Rate:</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.numberInput}
+            value={speechRate.toString()}
+            onChangeText={(text) => setSpeechRate(parseFloat(text))}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
       <View style={styles.container}>
         <TouchableOpacity
           style={[
@@ -106,6 +127,23 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  label: {
+    width: "80%",
+    textAlign: "right",
+    marginRight: 10,
+    color: "white",
+    fontWeight: "bold",
+  },
+  inputWrapper: {
+    width: "20%",
+    minWidth: 200,
+  },
   button: {
     padding: 15,
     borderRadius: 10,
@@ -135,6 +173,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  numberInput: {
+    width: "25%",
+    height: 40,
+    borderColor: "white",
+    borderWidth: 1,
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 15,
+    textAlign: "center",
+    backgroundColor: "white",
+  },
   textInput: {
     width: "70%",
     height: "25%",
