@@ -25,7 +25,7 @@ const Repeat = () => {
   const [inputText, setInputText] = useState("");
   const [spokenText, setSpokenText] = useState("");
   const [delayRepeat, setDelayRepeat] = useState(5);
-  const [speechRate, setSpeechRate] = useState(1);
+  const [speechRate, setSpeechRate] = useState(1.0);
 
   useFocusEffect(() => {
     loadSelectedImage().then((storedImage) => {
@@ -104,7 +104,13 @@ const Repeat = () => {
           <TextInput
             style={styles.numberInput}
             value={speechRate.toString()}
-            onChangeText={(text) => setSpeechRate(parseFloat(text))}
+            onChangeText={(text) => {
+              // Ensure the entered value is a number or float between 0.25 and 2
+              const rate = parseFloat(text);
+              if (rate >= 0 && rate <= 2) {
+                setSpeechRate(rate.toFixed(2)); // Limit to 2 decimal places
+              }
+            }}
             keyboardType="numeric"
           />
         </View>
