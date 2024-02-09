@@ -336,7 +336,10 @@ const HomeScreen = () => {
           {recordingsList.map((recording, index) => (
             <TouchableOpacity
               key={index}
-              onPress={() => setSelectedRecordingIndex(index)}
+              onPress={async () => {
+                setSelectedRecordingIndex(index);
+                await togglePlayStop();
+              }}
             >
               <View
                 style={[

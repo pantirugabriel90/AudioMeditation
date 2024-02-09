@@ -14,7 +14,7 @@ import {
   loadSelectedImage,
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
-const Repeat = ({ sound }) => {
+const Repeat = () => {
   const [backgroundColor, setBackgroundColor] = useState("black");
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -23,8 +23,10 @@ const Repeat = ({ sound }) => {
   );
 
   const [inputText, setInputText] = useState("");
+  const [spokenText, setSpokenText] = useState("");
+  const [delayRepeat, setDelayRepeat] = useState(5);
+
   useFocusEffect(() => {
-    // Load the selected image path from local storage when component mounts
     loadSelectedImage().then((storedImage) => {
       if (storedImage !== null) {
         setBackgroundImage(getBackgroundImage(storedImage));
@@ -32,33 +34,43 @@ const Repeat = ({ sound }) => {
     });
   });
 
-  const speakText = () => {
+  useEffect(() => {
+    if (isSpeaking) {
+      speakInLoop();
+    }
+  }, [isSpeaking]);
+
+  const speakInLoop = async () => {
+    if (isSpeaking) {
+      await Speech.speak(spokenText, {
+        rate: 1,
+        onDone: () => {
+          setTimeout(() => {
+            speakInLoop();
+          }, delayRepeat * 1000);
+        },
+      });
+    }
+  };
+  const speakText = async () => {
     if (inputText.trim() !== "") {
+      setSpokenText(inputText);
       setIsSpeaking(true);
-      repeatInterval = setInterval(() => {
-        Speech.speak(inputText, { rate: 1 }); // Adjust the rate as needed
-      }, 0); // Repeat every 5 seconds, adjust as needed
+      console.log("blablabal" + isSpeaking);
+    } else console.log("no text");
+  };
+
+  const stopSpeaking = async () => {
+    try {
+      console.log(isSpeaking);
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (error) {
+      console.error("Error stopping speech:", error);
     }
   };
 
-  const startRepeat = async () => {
-    try {
-      if (sound) {
-        await sound.stopAsync();
-        await sound.setPositionAsync(0);
-        await sound.replayAsync();
-      }
-    } catch (error) {
-      console.error("Error starting repeat:", error);
-    }
-  };
-  const stopSpeaking = () => {
-    setIsSpeaking(false);
-    clearInterval(repeatInterval);
-  };
   const changeBackgroundColor = () => {
-    // Implement your logic to change the background color
-    // For simplicity, let's toggle between two colors
     setBackgroundColor((prevColor) =>
       prevColor === "#ff9900" ? "#00ff00" : "#ff9900"
     );
