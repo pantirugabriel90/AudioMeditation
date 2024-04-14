@@ -97,16 +97,46 @@ const HomeScreen = () => {
     }
   };
 
-  const togglePlayStop = async () => {
+  const togglePlayStop = async (recordIndex) => {
     try {
       //if (sound) {
       console.log("isPlaying");
       console.log(isPlaying);
       if (isPlaying) {
         await stopSound();
-        await sound.stopAsync();
       } else {
-        await sound.replayAsync();
+        if (recordIndex !== null) {
+          console.log("recordIndex  " + recordIndex);
+          const selectedRecording = recordingsList[recordIndex];
+          console.log(
+            "test" +
+              selectedRecording.fileUri +
+              " " +
+              selectedRecording.name +
+              " " +
+              recordIndex
+          );
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: selectedRecording.fileUri },
+            {},
+            (status) => {
+              if (status.didJustFinish) {
+                const delayInSeconds =
+                  delayUnit === "seconds"
+                    ? parseInt(repeatDelay)
+                    : parseInt(repeatDelay) * 60;
+                setTimeout(() => {
+                  sound.replayAsync();
+                }, delayInSeconds * 1000);
+              }
+            }
+          );
+          setSound(sound);
+
+          await sound.replayAsync();
+        } else {
+          await sound.replayAsync();
+        }
       }
       setIsPlaying(!isPlaying);
       //   }
@@ -123,7 +153,9 @@ const HomeScreen = () => {
         setIsPlaying(false);
       }
     } catch (error) {
-      console.error("Error stopping sound:", error);
+      console.log("Error stopping sound:", error);
+
+      setIsPlaying(false);
     }
   };
 
@@ -197,7 +229,7 @@ const HomeScreen = () => {
         }
       }
     } catch (error) {
-      console.error("Error loading memorized recordings:", error);
+      console.log("Error loading memorized recordings:", error);
     }
   };
 
@@ -239,7 +271,7 @@ const HomeScreen = () => {
         }
       }
     } catch (error) {
-      console.error("Error replaying recording:", error);
+      console.log("Error replaying recording:", error);
     }
   };
 
@@ -338,7 +370,7 @@ const HomeScreen = () => {
               key={index}
               onPress={async () => {
                 setSelectedRecordingIndex(index);
-                await togglePlayStop();
+                await togglePlayStop(index);
               }}
             >
               <View
