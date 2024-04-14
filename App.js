@@ -15,12 +15,10 @@ const App = () => {
         screenOptions={{
           headerTitleAlign: "center",
           tabBarActiveBackgroundColor: "purple",
-          activeColor: "white",
-          inactiveColor: "purple",
-          tabBarActiveTintColor: "white", // Set active color to red
-          tabBarInactiveTintColor: "purple", // Set inactive color to white
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "purple",
           tabBarLabelStyle: {
-            fontSize: 9.6, // Adjust the font size as needed
+            fontSize: 9.6,
             fontWeight: "400",
           },
         }}
