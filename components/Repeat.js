@@ -56,6 +56,8 @@ const Repeat = () => {
   const speakText = async () => {
     if (inputText.trim() !== "") {
       setSpokenText(inputText);
+      setIsSpeaking(true);
+      await speakInLoop();
     } else console.log("no text");
   };
 
@@ -93,7 +95,11 @@ const Repeat = () => {
           <TextInput
             style={styles.numberInput}
             value={delayRepeat.toString()}
-            onChangeText={(text) => setDelayRepeat(parseInt(text))}
+            onChangeText={(text) => {
+              if (/^\d*\.?\d*$/.test(text)) {
+                setDelayRepeat(text === "" ? "" : parseFloat(text));
+              }
+            }}
             keyboardType="numeric"
           />
         </View>
