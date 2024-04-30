@@ -8,8 +8,10 @@ import {
   ImageBackground,
   Image,
 } from "react-native";
+
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
+import { PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import commonStyles from "./CommonStyles";
@@ -38,6 +40,7 @@ const HomeScreen = () => {
   );
 
   useEffect(() => {
+    requestPermissions();
     getPermissionsAsync();
     loadMemorizedRecording();
   }, []);
@@ -202,6 +205,14 @@ const HomeScreen = () => {
     try {
       await stopSound();
       if (sound) await sound.stopAsync();
+      const readStoragePermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+      );
+
+      if (!readStoragePermission) {
+        console.log("Permissions for reading external storage not granted.");
+        return;
+      }
       const storedRecordings = await AsyncStorage.getItem("memorizedRecords");
 
       if (storedRecordings) {
@@ -274,7 +285,29 @@ const HomeScreen = () => {
       console.log("Error replaying recording:", error);
     }
   };
+  const requestPermissions = async () => {
+    try {
+      const audioPermission = await Audio.requestPermissionsAsync();
+      const readStoragePermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+      );
+      const writeStoragePermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+      );
 
+      if (
+        audioPermission.status !== "granted" ||
+        readStoragePermission !== PermissionsAndroid.RESULTS.GRANTED ||
+        writeStoragePermission !== PermissionsAndroid.RESULTS.GRANTED
+      ) {
+        console.log("Permissions not granted");
+        return;
+      }
+      console.log("Permissions granted successfully");
+    } catch (error) {
+      console.error("Error requesting permissions:", error);
+    }
+  };
   const saveDelay = async () => {
     try {
       await AsyncStorage.setItem(

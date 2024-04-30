@@ -1,14 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./components/Home";
 import Repeat from "./components/Repeat"; // Corrected import statement
 import { Ionicons } from "@expo/vector-icons";
 import Settings from "./components/Settings";
+import { View, Text, StyleSheet, Button } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 const Tab = createBottomTabNavigator();
+// import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 
+// const Tab = createMaterialBottomTabNavigator();
 const App = () => {
+  const [error, setError] = useState(null);
+
+  // useEffect to log errors
+  useEffect(() => {
+    if (error) {
+      console.error("An error occurred:", error);
+      // You can also send the error to your logging service here
+    }
+  }, [error]);
+
+  // Error boundary component
+  class ErrorBoundary extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error) {
+      // Update state to trigger the error UI
+      return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+      // Log the error to an error reporting service
+      setError(error);
+    }
+
+    render() {
+      if (this.state.hasError) {
+        // You can render any custom fallback UI
+        return <Text>Something went wrong.</Text>;
+      }
+
+      return this.props.children;
+    }
+  }
   return (
     <NavigationContainer>
       <Tab.Navigator
