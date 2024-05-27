@@ -78,7 +78,7 @@ const App = () => {
               padding: 0,
             },
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-home" size={24} color={color} />
+              <Ionicons name="home" size={24} color={color} />
             ),
             tabBarLabel: "Home",
             tabBarLabelStyle: {
@@ -101,7 +101,7 @@ const App = () => {
               backgroundColor: "purple",
             },
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-repeat" size={24} color={color} />
+              <Ionicons name="repeat" size={24} color={color} />
             ),
             tabBarLabel: "Repeat",
             tabBarLabelStyle: {
@@ -125,7 +125,7 @@ const App = () => {
               backgroundColor: "purple",
             },
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ios-settings" size={24} color={color} />
+              <Ionicons name="settings" size={24} color={color} />
             ),
             tabBarLabel: "Settings",
             tabBarLabelStyle: {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Platform } from "react-native";
 import {
   View,
   Text,
@@ -24,13 +25,14 @@ import {
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
 
+import * as KeepAwake from "expo-keep-awake";
 const HomeScreen = () => {
   const [selectedRecordingIndex, setSelectedRecordingIndex] = useState(null);
   const [recording, setRecording] = useState(null);
   const [temporary, setTemporary] = useState(null);
   const [sound, setSound] = useState();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [repeatDelay, setRepeatDelay] = useState("0");
+  const [repeatDelay, setRepeatDelay] = useState("5");
   const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
@@ -40,8 +42,7 @@ const HomeScreen = () => {
   );
 
   useEffect(() => {
-    requestPermissions();
-    getPermissionsAsync();
+    requestDiskPermissions();
     loadMemorizedRecording();
   }, []);
   useFocusEffect(() => {
@@ -51,20 +52,56 @@ const HomeScreen = () => {
       }
     });
   });
-  const getPermissionsAsync = async () => {
+  const setupAudio = async () => {
     try {
-      const audioPermission = await Audio.requestPermissionsAsync();
-      if (audioPermission.status !== "granted") {
-        console.log("Audio permission not granted");
-        return;
-      }
-      console.log("Audio and file system permissions granted");
-    } catch (error) {
-      console.error("Error getting permissions:", error);
+      await Audio.setAudioModeAsync({
+        // allowsRecordingIOS: false,
+        // interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        // playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: 2, // InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: true,
+      });
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+  const requestWakeLock = async () => {
+    try {
+      await KeepAwake.activateKeepAwakeAsync("");
+      console.log("Wake lock acquired");
+    } catch (err) {
+      console.error("Error acquiring wake lock:", err);
     }
   };
 
+  const releaseWakeLock = async () => {
+    try {
+      await KeepAwake.deactivateKeepAwake("");
+      console.log("Wake lock released");
+    } catch (err) {
+      console.error("Error releasing wake lock:", err);
+    }
+  };
   const toggleRecording = async () => {
+    try {
+      // alert("bfore calling requestPermissions");
+      //await requestMicrophonePermissions();  try {
+      console.log("Requesting permissions..");
+
+      const AudioPerm = await Audio.requestPermissionsAsync();
+      if (AudioPerm.status === "granted") {
+        // alert("Audio Permission Granted");
+      } else {
+        alert(
+          "audio permisions not granted. status received: " + AudioPerm.status
+        );
+        return;
+      }
+    } catch (error) {
+      alert("error while requesting permisisons   " + error.message);
+    }
     try {
       await stopSound();
       if (sound) await sound.stopAsync();
@@ -96,20 +133,29 @@ const HomeScreen = () => {
         setRecording(recordingObj);
       }
     } catch (error) {
-      console.error("Error:", error);
+      alert(error.message);
+      console.log("error while starting the recording: ");
+      console.error("Error while starting the recording:", error);
     }
   };
 
   const togglePlayStop = async (recordIndex) => {
     try {
       //if (sound) {
-      console.log("isPlaying");
-      console.log(isPlaying);
+      var shouldPlay = isPlaying;
+      console.log("isPlaying" + isPlaying);
+      await setupAudio(); // Ensure audio is set up for background playback
+
       if (isPlaying) {
+        setIsPlaying(false);
+        await releaseWakeLock();
         await stopSound();
       } else {
-        if (recordIndex !== null) {
-          console.log("recordIndex  " + recordIndex);
+        await setIsPlaying(true);
+        shouldPlay = true;
+        if (typeof recordIndex === "number") {
+          await requestWakeLock();
+          console.log("recordIndex  " + JSON.stringify(recordIndex));
           const selectedRecording = recordingsList[recordIndex];
           console.log(
             "test" +
@@ -119,11 +165,26 @@ const HomeScreen = () => {
               " " +
               recordIndex
           );
+          var first = true;
           const { sound } = await Audio.Sound.createAsync(
             { uri: selectedRecording.fileUri },
             {},
             (status) => {
-              if (status.didJustFinish) {
+              console.log(
+                "finished playing song " +
+                  delayUnit +
+                  "  repeatDelay " +
+                  isPlaying
+                //   + JSON.stringify(status)
+              );
+              if ((status.shouldPlay && isPlaying) || first) {
+                first = false;
+                console.log(
+                  "finished playing song " +
+                    delayUnit +
+                    "  repeatDelay " +
+                    repeatDelay
+                );
                 const delayInSeconds =
                   delayUnit === "seconds"
                     ? parseInt(repeatDelay)
@@ -141,7 +202,6 @@ const HomeScreen = () => {
           await sound.replayAsync();
         }
       }
-      setIsPlaying(!isPlaying);
       //   }
     } catch (error) {
       console.error("Error:", error);
@@ -249,14 +309,14 @@ const HomeScreen = () => {
       await stopSound();
       if (sound) await sound.stopAsync();
       const delaySettings = await AsyncStorage.getItem("delaySettings");
+      console.log(delaySettings);
       if (delaySettings) {
         const { repeatDelay: savedRepeatDelay, delayUnit: savedDelayUnit } =
           JSON.parse(delaySettings);
 
         setRepeatDelay(savedRepeatDelay);
         setDelayUnit(savedDelayUnit);
-        console.log("specificRecording");
-        console.log(specificRecording);
+        console.log("specificRecording" + specificRecording);
         let memorizedURI = specificRecording
           ? specificRecording.fileUri
           : await AsyncStorage.getItem("memorizedRecording");
@@ -280,39 +340,91 @@ const HomeScreen = () => {
 
           setSound(sound);
         }
+        console.log("what is here");
       }
     } catch (error) {
       console.log("Error replaying recording:", error);
     }
   };
-  const requestPermissions = async () => {
+  const requestDiskPermissions = async () => {
+    let logMessage = ""; // To store log messages
     try {
-      const audioPermission = await Audio.requestPermissionsAsync();
-      const readStoragePermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-      );
-      const writeStoragePermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-      );
+      if (Platform.OS === "android") {
+        const readStoragePermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+        );
+        logMessage += `Read storage permission: ${readStoragePermission}\n`; // Log read storage permission result
 
-      if (
-        audioPermission.status !== "granted" ||
-        readStoragePermission !== PermissionsAndroid.RESULTS.GRANTED ||
-        writeStoragePermission !== PermissionsAndroid.RESULTS.GRANTED
-      ) {
-        console.log("Permissions not granted");
-        return;
+        const writeStoragePermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        );
+        logMessage += `Write storage permission: ${writeStoragePermission}\n`; // Log write storage permission result
+
+        if (
+          readStoragePermission !== PermissionsAndroid.RESULTS.GRANTED ||
+          writeStoragePermission !== PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log("Disk permissions not granted");
+          alert("Disk permissions not granted:\n" + logMessage); // Display all permission results in an alert
+          return;
+        }
+      } else {
+        // Handle disk permissions for iOS if needed
       }
-      console.log("Permissions granted successfully");
+
+      console.log("Disk permissions granted successfully");
     } catch (error) {
-      console.error("Error requesting permissions:", error);
+      alert(error.message);
+      alert("Disk permissions not granted:\n" + logMessage); // Display all permission results in an alert
+      console.error("Error requesting disk permissions:", error);
     }
   };
-  const saveDelay = async () => {
+
+  const requestMicrophonePermissions = async () => {
+    let logMessage = ""; // To store log messages
     try {
+      if (Platform.OS === "android") {
+        const audioPermission = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+        );
+        logMessage += `Microphone permission for Android: ${audioPermission}\n`; // Log Android microphone permission result
+
+        if (audioPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Microphone permission not granted for Android");
+          alert("Microphone permission not granted for Android");
+          return;
+        }
+      } else {
+        const { status: microphonePermission } = await Permissions.askAsync(
+          Permissions.AUDIO_RECORDING
+        );
+        logMessage += `Microphone permission for iOS: ${microphonePermission}\n`; // Log iOS microphone permission result
+
+        if (microphonePermission !== "granted") {
+          console.log("Microphone permission not granted for iOS");
+          alert("Microphone permission not granted for iOS");
+          return;
+        }
+      }
+
+      console.log("Microphone permissions granted successfully");
+    } catch (error) {
+      alert(error.message);
+      alert("Microphone permissions not granted:\n" + logMessage); // Display all permission results in an alert
+      console.error("Error requesting microphone permissions:", error);
+    }
+  };
+
+  // Usage:
+  // Call requestDiskPermissions and requestMicrophonePermissions functions where needed in your code.
+
+  const saveDelay = async (delay) => {
+    try {
+      console.log("delay" + delay);
+      setRepeatDelay(delay);
       await AsyncStorage.setItem(
         "delaySettings",
-        JSON.stringify({ repeatDelay, delayUnit })
+        JSON.stringify({ delay, delayUnit })
       );
 
       replayRecording();
@@ -340,12 +452,14 @@ const HomeScreen = () => {
               {recording ? "Stop Recording" : "Record"}
             </Text>
           </TouchableOpacity>
+          {/*
           <TouchableOpacity
             style={[styles.button, styles.playButton]}
             onPress={togglePlayStop}
           >
             <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
           </TouchableOpacity>
+  */}
           <TouchableOpacity
             style={[styles.button, styles.memorizeButton]}
             onPress={memorizeRecording}
@@ -354,12 +468,16 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.delayContainer}>
+          <Text style={styles.label}>Replay delay:</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter delay"
-            keyboardType="numeric"
+            style={styles.numberInput}
             value={repeatDelay}
-            onChangeText={(text) => setRepeatDelay(text)}
+            onChangeText={(text) => {
+              if (text && /^\d*\.?\d*$/.test(text)) {
+                saveDelay(text);
+              }
+            }}
+            keyboardType="numeric"
           />
 
           <View>
@@ -382,13 +500,6 @@ const HomeScreen = () => {
               <Text style={styles.radioButtonLabel}>Seconds</Text>
             </View>
           </View>
-
-          <TouchableOpacity
-            style={[styles.button, styles.saveButton]}
-            onPress={saveDelay}
-          >
-            <Text style={styles.buttonText}>Save Delay</Text>
-          </TouchableOpacity>
         </View>
         <TextInput
           style={styles.input}
@@ -429,6 +540,29 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  input: {
+    backgroundColor: "pink",
+    height: 40,
+    borderColor: "white",
+    borderWidth: 1,
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 15,
+    textAlign: "center",
+    backgroundColor: "white",
+    padding: 10,
+  },
+  numberInput: {
+    width: "25%",
+    height: 40,
+    borderColor: "white",
+    borderWidth: 1,
+    marginTop: 10,
+    marginBottom: 10,
+    borderRadius: 15,
+    textAlign: "center",
+    backgroundColor: "white",
+  },
   radioButtonLabel: {
     marginLeft: 5,
     backgroundColor: "white",
@@ -493,15 +627,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
     flexDirection: "row",
   },
-  input: {
-    backgroundColor: "pink",
-    height: 40,
-    borderColor: "purple",
-    borderWidth: 1,
-    marginBottom: 10,
-    padding: 10,
-    textAlign: "center",
-  },
   delayContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -564,6 +689,21 @@ const styles = StyleSheet.create({
     color: "blue", // Customize the color for the replacement icon
     fontSize: 20,
     marginLeft: 10, // Adjust spacing between delete and replace icons
+  },
+  inputContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  label: {
+    marginRight: 10,
+    color: "white",
+    fontWeight: "bold",
+  },
+  inputWrapper: {
+    width: "20%",
+    minWidth: 200,
   },
 });
 

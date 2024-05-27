@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
+import * as KeepAwake from "expo-keep-awake";
+import { Audio } from "expo-av";
 import {
   saveSelectedImage,
   loadSelectedImage,
@@ -34,27 +36,73 @@ const Repeat = () => {
       }
     });
   });
+  const requestWakeLock = async () => {
+    try {
+      await KeepAwake.activateKeepAwakeAsync("");
+      console.log("Wake lock acquired");
+    } catch (err) {
+      console.error("Error acquiring wake lock:", err);
+    }
+  };
 
+  const releaseWakeLock = async () => {
+    try {
+      await KeepAwake.deactivateKeepAwake("");
+      console.log("Wake lock released");
+    } catch (err) {
+      console.error("Error releasing wake lock:", err);
+    }
+  };
+  const setupAudio = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        // allowsRecordingIOS: false,
+        // interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        // playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: 2, // InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: true,
+      });
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
   useEffect(() => {
     if (isSpeaking) {
       speakInLoop();
     }
   }, [isSpeaking]);
-
+  // const speakInLoop = async () => {
+  //   if (isSpeaking) {
+  //     await Speech.speak(spokenText, {
+  //       rate: speechRate,
+  //       onDone: () => {
+  //         setTimeout(() => {
+  //           speakInLoop();
+  //         }, delayRepeat * 1000);
+  //       },
+  //     });
+  //   }
+  // };
   const speakInLoop = async () => {
     if (isSpeaking) {
+      await setupAudio(); // Ensure audio is set up for background playback
       await Speech.speak(spokenText, {
         rate: speechRate,
         onDone: () => {
-          setTimeout(() => {
-            speakInLoop();
-          }, delayRepeat * 1000);
+          if (isSpeaking) {
+            setTimeout(() => {
+              speakInLoop();
+            }, delayRepeat * 1000);
+          }
         },
       });
     }
   };
   const speakText = async () => {
     if (inputText.trim() !== "") {
+      await requestWakeLock();
       setSpokenText(inputText);
       setIsSpeaking(true);
       await speakInLoop();
@@ -66,6 +114,8 @@ const Repeat = () => {
       console.log(isSpeaking);
       await Speech.stop();
       setIsSpeaking(false);
+
+      await releaseWakeLock();
     } catch (error) {
       console.error("Error stopping speech:", error);
     }
