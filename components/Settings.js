@@ -15,6 +15,7 @@ import {
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
 
+import * as design from "./common/styles";
 import { useFocusEffect } from "@react-navigation/native";
 const Settings = ({ sound }) => {
   const [backgroundImage, setBackgroundImage] = useState(
@@ -53,7 +54,7 @@ const Settings = ({ sound }) => {
 
   return (
     <ImageBackground
-      source={backgroundImage}
+      source={design.backgroundImage}
       style={styles.background}
       resizeMode="cover"
     >

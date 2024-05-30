@@ -7,6 +7,7 @@ import Settings from "./components/Settings";
 import { View, Text, StyleSheet, Button } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
+import * as design from "./components/common/styles";
 const Tab = createBottomTabNavigator();
 // import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 
@@ -53,11 +54,14 @@ const App = () => {
       <Tab.Navigator
         screenOptions={{
           headerTitleAlign: "center",
-          tabBarActiveBackgroundColor: "purple",
-          tabBarActiveTintColor: "white",
-          tabBarInactiveTintColor: "purple",
+          tabBarActiveBackgroundColor: design.colors.purple08,
+          tabBarActiveTintColor: design.colors.white,
+          activeColor: design.colors.white,
+          inactiveColor: design.colors.white,
+          tabBarActiveTintColor: design.colors.white, // Set active color to red
+          tabBarInactiveTintColor: design.colors.purple08, // Set inactive color to white
           tabBarLabelStyle: {
-            fontSize: 9.6,
+            fontSize: 9.6, // Adjust the font size as needed
             fontWeight: "400",
           },
         }}
@@ -67,10 +71,10 @@ const App = () => {
           component={HomeScreen}
           options={{
             headerTitleStyle: {
-              color: "white",
+              color: design.colors.headerTitleColor,
             },
             headerStyle: {
-              backgroundColor: "purple",
+              backgroundColor: design.colors.purple08,
             },
             labelStyle: {
               fontSize: 10,
@@ -81,13 +85,6 @@ const App = () => {
               <Ionicons name="home" size={24} color={color} />
             ),
             tabBarLabel: "Home",
-            tabBarLabelStyle: {
-              color: "black",
-            },
-            tabBarStyle: {
-              alignItems: "center",
-              justifyContent: "center",
-            },
           }}
         />
         <Tab.Screen
@@ -95,48 +92,34 @@ const App = () => {
           component={Repeat}
           options={{
             headerTitleStyle: {
-              color: "white",
+              color: design.colors.headerTitleColor,
             },
             headerStyle: {
-              backgroundColor: "purple",
+              backgroundColor: design.colors.purple08,
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="repeat" size={24} color={color} />
             ),
             tabBarLabel: "Repeat",
-            tabBarLabelStyle: {
-              color: "black",
-            },
-            tabBarStyle: {
-              alignItems: "center",
-              justifyContent: "center",
-            },
           }}
         />
 
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Settings"
           component={Settings}
           options={{
             headerTitleStyle: {
-              color: "white",
+              color: design.colors.headerTitleColor,
             },
             headerStyle: {
-              backgroundColor: "purple",
+              backgroundColor: design.colors.purple08,
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="settings" size={24} color={color} />
             ),
             tabBarLabel: "Settings",
-            tabBarLabelStyle: {
-              color: "black",
-            },
-            tabBarStyle: {
-              alignItems: "center",
-              justifyContent: "center",
-            },
           }}
-        />
+        /> */}
       </Tab.Navigator>
     </NavigationContainer>
   );

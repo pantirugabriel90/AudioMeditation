@@ -16,6 +16,8 @@ import {
   loadSelectedImage,
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
+
+import * as design from "./common/styles";
 const Repeat = () => {
   const [backgroundColor, setBackgroundColor] = useState("black");
 
@@ -129,7 +131,7 @@ const Repeat = () => {
 
   return (
     <ImageBackground
-      source={backgroundImage}
+      source={design.backgroundImage}
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
@@ -175,11 +177,11 @@ const Repeat = () => {
         <TouchableOpacity
           style={[
             styles.button,
-            isSpeaking ? styles.stopButton : styles.textToSpeechButton,
+            isSpeaking ? styles.stopButton : styles.addButton,
           ]}
           onPress={isSpeaking ? stopSpeaking : speakText}
         >
-          <Text style={styles.buttonText}>
+          <Text style={styles.addButtonText}>
             {isSpeaking ? "Stop Speaking" : "Text to Speech"}
           </Text>
         </TouchableOpacity>
@@ -189,6 +191,19 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  addButton: {
+    backgroundColor: design.colors.buttonBackgroundColor,
+    padding: 10,
+    height: 50,
+    borderRadius: 8,
+    marginLeft: 10,
+    marginBottom: 10,
+  },
+  addButtonText: {
+    color: design.colors.buttonTextColor,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   inputContainer: {
     flexDirection: "row",
     justifyContent: "center",

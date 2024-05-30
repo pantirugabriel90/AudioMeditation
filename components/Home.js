@@ -25,6 +25,7 @@ import {
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
 
+import * as design from "./common/styles";
 import * as KeepAwake from "expo-keep-awake";
 const HomeScreen = () => {
   const [selectedRecordingIndex, setSelectedRecordingIndex] = useState(null);
@@ -438,17 +439,17 @@ const HomeScreen = () => {
   </View>;
   return (
     <ImageBackground
-      source={backgroundImage}
+      source={design.backgroundImage}
       style={styles.background}
       resizeMode="cover"
     >
       <View style={styles.container}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            style={[styles.button, styles.recordButton]}
+            style={[styles.addButton]}
             onPress={toggleRecording}
           >
-            <Text style={styles.buttonText}>
+            <Text style={styles.addButtonText}>
               {recording ? "Stop Recording" : "Record"}
             </Text>
           </TouchableOpacity>
@@ -461,10 +462,10 @@ const HomeScreen = () => {
           </TouchableOpacity>
   */}
           <TouchableOpacity
-            style={[styles.button, styles.memorizeButton]}
+            style={[styles.addButton]}
             onPress={memorizeRecording}
           >
-            <Text style={styles.buttonText}>Save Recording</Text>
+            <Text style={styles.addButtonText}>Save Recording</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.delayContainer}>
@@ -486,7 +487,7 @@ const HomeScreen = () => {
                 value="minutes"
                 status={delayUnit === "minutes" ? "checked" : "unchecked"}
                 onPress={() => setDelayUnit("minutes")}
-                color="#ffcc00"
+                color={design.colors.buttonBackgroundColor}
               />
               <Text style={styles.radioButtonLabel}>Minutes</Text>
             </View>
@@ -495,7 +496,7 @@ const HomeScreen = () => {
                 value="seconds"
                 status={delayUnit === "seconds" ? "checked" : "unchecked"}
                 onPress={() => setDelayUnit("seconds")}
-                color="#ffcc00"
+                color={design.colors.buttonBackgroundColor}
               />
               <Text style={styles.radioButtonLabel}>Seconds</Text>
             </View>
@@ -508,7 +509,9 @@ const HomeScreen = () => {
           onChangeText={(text) => setRecordingName(text)}
         />
         <View style={styles.recordingsListContainer}>
-          <Text style={styles.recordingsListTitle}>Recordings List:</Text>
+          <Text style={[styles.addButtonText, { fontSize: 22 }]}>
+            Recordings List:
+          </Text>
           {recordingsList.map((recording, index) => (
             <TouchableOpacity
               key={index}
@@ -540,13 +543,24 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  addButton: {
+    backgroundColor: design.colors.buttonBackgroundColor,
+    padding: 10,
+    height: 50,
+    borderRadius: 8,
+    marginLeft: 10,
+  },
+  addButtonText: {
+    color: design.colors.buttonTextColor,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   input: {
     backgroundColor: "pink",
     height: 40,
     borderColor: "white",
     borderWidth: 1,
     marginTop: 10,
-    marginBottom: 10,
     borderRadius: 15,
     textAlign: "center",
     backgroundColor: "white",
@@ -595,12 +609,10 @@ const styles = StyleSheet.create({
 
   statusText: {
     fontSize: 25,
-    marginBottom: 20,
   },
   button: {
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
     alignItems: "center",
     marginLeft: 10,
   },
@@ -631,7 +643,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
     marginRight: 5,
   },
   radioContainer: {
@@ -654,7 +665,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   recordingsListContainer: {
-    marginBottom: -30,
     alignItems: "right",
   },
   recordingsListTitle: {
@@ -694,7 +704,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
   },
   label: {
     marginRight: 10,
