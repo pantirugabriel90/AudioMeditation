@@ -16,7 +16,7 @@ import {
   loadSelectedImage,
   getBackgroundImage,
 } from "../Utils/BackgroundUtils";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as design from "./common/styles";
 const Repeat = () => {
   const [backgroundColor, setBackgroundColor] = useState("black");
@@ -30,7 +30,36 @@ const Repeat = () => {
   const [spokenText, setSpokenText] = useState("");
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
+  useEffect(() => {
+    const loadValues = async () => {
+      try {
+        const savedText = await AsyncStorage.getItem("inputText");
+        const savedDelay = await AsyncStorage.getItem("delayRepeat");
+        const savedRate = await AsyncStorage.getItem("speechRate");
 
+        setInputText(savedText || "");
+        setDelayRepeat(parseFloat(savedDelay) || 5);
+        setSpeechRate(parseFloat(savedRate) || 1.0);
+      } catch (error) {
+        console.log("Error loading data from AsyncStorage:", error);
+      }
+    };
+
+    loadValues();
+  }, []);
+  useEffect(() => {
+    const saveValues = async () => {
+      try {
+        await AsyncStorage.setItem("inputText", inputText);
+        await AsyncStorage.setItem("delayRepeat", delayRepeat.toString());
+        await AsyncStorage.setItem("speechRate", speechRate.toString());
+      } catch (error) {
+        console.error("Error saving data to AsyncStorage:", error);
+      }
+    };
+
+    saveValues();
+  }, [inputText, delayRepeat, speechRate]);
   useFocusEffect(() => {
     loadSelectedImage().then((storedImage) => {
       if (storedImage !== null) {
@@ -70,15 +99,11 @@ const Repeat = () => {
       console.log(ex);
     }
   };
-  const intervalIdRef = useRef(null); // useRef to hold the interval ID
-
-  // ... other functions like requestWakeLock, releaseWakeLock, setupAudio
+  const intervalIdRef = useRef(null);
 
   useEffect(() => {
     if (isSpeaking) {
-      //   speakInLoop();
     } else {
-      // **Change:** Clear the interval if isSpeaking is false
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
     }
@@ -88,18 +113,6 @@ const Repeat = () => {
       speakInLoop();
     }
   }, [isSpeaking]);
-  // const speakInLoop = async () => {
-  //   if (isSpeaking) {
-  //     await Speech.speak(spokenText, {
-  //       rate: speechRate,
-  //       onDone: () => {
-  //         setTimeout(() => {
-  //           speakInLoop();
-  //         }, delayRepeat * 1000);
-  //       },
-  //     });
-  //   }
-  // };
   const speakText = async () => {
     if (inputText.trim() !== "") {
       await requestWakeLock();
