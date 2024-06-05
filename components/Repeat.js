@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -70,6 +70,19 @@ const Repeat = () => {
       console.log(ex);
     }
   };
+  const intervalIdRef = useRef(null); // useRef to hold the interval ID
+
+  // ... other functions like requestWakeLock, releaseWakeLock, setupAudio
+
+  useEffect(() => {
+    if (isSpeaking) {
+      //   speakInLoop();
+    } else {
+      // **Change:** Clear the interval if isSpeaking is false
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    }
+  }, [isSpeaking]);
   useEffect(() => {
     if (isSpeaking) {
       speakInLoop();
@@ -107,9 +120,9 @@ const Repeat = () => {
         },
       });
       if (isSpeaking) {
-        // Check again after speaking in case stop was pressed during playback
-        setTimeout(() => {
-          // speakInLoop();
+        // **Change:** Use setTimeout with intervalIdRef
+        intervalIdRef.current = setTimeout(async () => {
+          await speakInLoop();
         }, delayRepeat * 1000);
       }
     }
