@@ -7,9 +7,12 @@ import {
   TextInput,
   StyleSheet,
   ImageBackground,
+  Keyboard,
+  KeyboardAvoidingView,
   Image,
 } from "react-native";
 
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import { PermissionsAndroid } from "react-native";
@@ -41,7 +44,28 @@ const HomeScreen = () => {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
   useEffect(() => {
     requestDiskPermissions();
     loadMemorizedRecording();
@@ -56,9 +80,6 @@ const HomeScreen = () => {
   const setupAudio = async () => {
     try {
       await Audio.setAudioModeAsync({
-        // allowsRecordingIOS: false,
-        // interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-        // playsInSilentModeIOS: true,
         shouldDuckAndroid: true,
         interruptionModeAndroid: 2, // InterruptionModeAndroid.DuckOthers,
         playThroughEarpieceAndroid: false,
@@ -158,34 +179,13 @@ const HomeScreen = () => {
           await requestWakeLock();
           console.log("recordIndex  " + JSON.stringify(recordIndex));
           const selectedRecording = recordingsList[recordIndex];
-          console.log(
-            "test" +
-              selectedRecording.fileUri +
-              " " +
-              selectedRecording.name +
-              " " +
-              recordIndex
-          );
           var first = true;
           const { sound } = await Audio.Sound.createAsync(
             { uri: selectedRecording.fileUri },
             {},
             (status) => {
-              console.log(
-                "finished playing song " +
-                  delayUnit +
-                  "  repeatDelay " +
-                  isPlaying
-                //   + JSON.stringify(status)
-              );
               if ((status.shouldPlay && isPlaying) || first) {
                 first = false;
-                console.log(
-                  "finished playing song " +
-                    delayUnit +
-                    "  repeatDelay " +
-                    repeatDelay
-                );
                 const delayInSeconds =
                   delayUnit === "seconds"
                     ? parseInt(repeatDelay)
@@ -381,44 +381,6 @@ const HomeScreen = () => {
     }
   };
 
-  const requestMicrophonePermissions = async () => {
-    let logMessage = ""; // To store log messages
-    try {
-      if (Platform.OS === "android") {
-        const audioPermission = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-        );
-        logMessage += `Microphone permission for Android: ${audioPermission}\n`; // Log Android microphone permission result
-
-        if (audioPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-          console.log("Microphone permission not granted for Android");
-          alert("Microphone permission not granted for Android");
-          return;
-        }
-      } else {
-        const { status: microphonePermission } = await Permissions.askAsync(
-          Permissions.AUDIO_RECORDING
-        );
-        logMessage += `Microphone permission for iOS: ${microphonePermission}\n`; // Log iOS microphone permission result
-
-        if (microphonePermission !== "granted") {
-          console.log("Microphone permission not granted for iOS");
-          alert("Microphone permission not granted for iOS");
-          return;
-        }
-      }
-
-      console.log("Microphone permissions granted successfully");
-    } catch (error) {
-      alert(error.message);
-      alert("Microphone permissions not granted:\n" + logMessage); // Display all permission results in an alert
-      console.error("Error requesting microphone permissions:", error);
-    }
-  };
-
-  // Usage:
-  // Call requestDiskPermissions and requestMicrophonePermissions functions where needed in your code.
-
   const saveDelay = async (delay) => {
     try {
       console.log("delay" + delay);
@@ -453,14 +415,19 @@ const HomeScreen = () => {
               {recording ? "Stop Recording" : "Record"}
             </Text>
           </TouchableOpacity>
-          {/*
+
           <TouchableOpacity
-            style={[styles.button, styles.playButton]}
+            style={[
+              styles.button,
+              styles.playButton,
+              !selectedRecordingIndex && styles.disabledButton,
+            ]}
             onPress={togglePlayStop}
+            disabled={!selectedRecordingIndex}
           >
             <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
           </TouchableOpacity>
-  */}
+
           <TouchableOpacity
             style={[styles.addButton]}
             onPress={memorizeRecording}
@@ -508,41 +475,54 @@ const HomeScreen = () => {
           value={recordingName}
           onChangeText={(text) => setRecordingName(text)}
         />
-        <View style={styles.recordingsListContainer}>
-          <Text style={[styles.addButtonText, { fontSize: 22 }]}>
-            Recordings List:
-          </Text>
-          {recordingsList.map((recording, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={async () => {
-                setSelectedRecordingIndex(index);
-                await togglePlayStop(index);
-              }}
-            >
-              <View
-                style={[
-                  styles.recordingItemContainer,
-                  selectedRecordingIndex === index && styles.selectedRecording,
-                ]}
+        {!isKeyboardVisible && (
+          <View style={styles.recordingsListContainer}>
+            <Text style={[styles.addButtonText, { fontSize: 22 }]}>
+              Recordings List:
+            </Text>
+            {recordingsList.map((recording, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={async () => {
+                  setSelectedRecordingIndex(index);
+                  await togglePlayStop(index);
+                }}
               >
-                <Text style={styles.recordingItem}>{recording.name}</Text>
+                <View
+                  style={[
+                    styles.recordingItemContainer,
+                    selectedRecordingIndex === index &&
+                      styles.selectedRecording,
+                  ]}
+                >
+                  <Text style={styles.recordingItem}>{recording.name}</Text>
 
-                <Icon
-                  name="delete-forever"
-                  style={styles.deleteIcon}
-                  onPress={() => handleDeleteRecording(index)}
-                />
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+                  <Icon
+                    name="delete-forever"
+                    style={styles.deleteIcon}
+                    onPress={() => handleDeleteRecording(index)}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
     </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  background: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    flex: 1,
+    justifyContent: "space-around",
+  },
   addButton: {
     backgroundColor: design.colors.buttonBackgroundColor,
     padding: 10,
@@ -565,6 +545,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "white",
     padding: 10,
+  },
+  disabledButton: {
+    backgroundColor: "gray", // Style for disabled button
   },
   numberInput: {
     width: "25%",
@@ -658,11 +641,6 @@ const styles = StyleSheet.create({
   },
   radioButtonSelected: {
     backgroundColor: "#ffcc00",
-  },
-  background: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   recordingsListContainer: {
     alignItems: "right",

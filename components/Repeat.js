@@ -87,21 +87,6 @@ const Repeat = () => {
   //     });
   //   }
   // };
-  const speakInLoop = async () => {
-    if (isSpeaking) {
-      await setupAudio(); // Ensure audio is set up for background playback
-      await Speech.speak(spokenText, {
-        rate: speechRate,
-        onDone: () => {
-          if (isSpeaking) {
-            setTimeout(() => {
-              speakInLoop();
-            }, delayRepeat * 1000);
-          }
-        },
-      });
-    }
-  };
   const speakText = async () => {
     if (inputText.trim() !== "") {
       await requestWakeLock();
@@ -111,12 +96,31 @@ const Repeat = () => {
     } else console.log("no text");
   };
 
+  const speakInLoop = async () => {
+    console.log("isSpeaking" + isSpeaking);
+    if (isSpeaking) {
+      await setupAudio(); // Ensure audio is set up for background playback
+      await Speech.speak(spokenText, {
+        rate: speechRate,
+        onDone: () => {
+          // onDone callback can be used for additional logic after speech finishes, but not for stopping currently
+        },
+      });
+      if (isSpeaking) {
+        // Check again after speaking in case stop was pressed during playback
+        setTimeout(() => {
+          // speakInLoop();
+        }, delayRepeat * 1000);
+      }
+    }
+  };
   const stopSpeaking = async () => {
     try {
       console.log(isSpeaking);
-      await Speech.stop();
       setIsSpeaking(false);
 
+      console.log(isSpeaking);
+      await Speech.stop();
       await releaseWakeLock();
     } catch (error) {
       console.error("Error stopping speech:", error);
