@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import {
   View,
@@ -35,12 +35,18 @@ const HomeScreen = () => {
   const [recording, setRecording] = useState(null);
   const [temporary, setTemporary] = useState(null);
   const [sound, setSound] = useState();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingg, setIsPlayingg] = useState(false);
   const [repeatDelay, setRepeatDelay] = useState("5");
   const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
-
+  const intervalIdRef = useRef(null); // Create useRef for interval ID
+  // useEffect(() => {
+  //   if (isPlaying) {
+  //     console.log("isPlayying record index " + selectedRecordingIndex);
+  //     togglePlay(selectedRecordingIndex);
+  //   } else toggleStop(selectedRecordingIndex);
+  // }, [isPlaying, selectedRecordingIndex]);
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
@@ -77,6 +83,47 @@ const HomeScreen = () => {
       }
     });
   });
+  useEffect(() => {
+    console.log("useEffect triggered");
+    const playAudio = async () => {
+      console.log("playAudio");
+      if (isPlayingg && sound) {
+        console.log("playAudio inside iffff");
+        try {
+          await sound.replayAsync();
+          const delayInSeconds =
+            delayUnit === "seconds"
+              ? parseInt(repeatDelay)
+              : parseInt(repeatDelay) * 60;
+
+          // **Clear existing interval before creating a new one**
+          clearInterval(intervalIdRef.current);
+          intervalIdRef.current = setTimeout(() => {
+            playAudio();
+          }, delayInSeconds * 1000);
+        } catch (error) {
+          console.error("Error playing audio:", error);
+        }
+      } else if (isPlayingg && selectedRecordingIndex) {
+        console.log("playAudio is Playing and selected Recording Index");
+        await togglePlay(selectedRecordingIndex);
+      } else {
+        console.log(
+          "playAudio clearing interval " +
+            isPlayingg +
+            " " +
+            selectedRecordingIndex
+        );
+        // Clear interval if isPlaying is false or sound is unavailable
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
+    playAudio();
+    console.log("MARE OM MARE CARACTER");
+    // Cleanup function to clear interval on unmount
+    return () => clearInterval(intervalIdRef.current);
+  }, [isPlayingg, sound]);
   const setupAudio = async () => {
     try {
       await Audio.setAudioModeAsync({
@@ -92,6 +139,13 @@ const HomeScreen = () => {
   const requestWakeLock = async () => {
     try {
       await KeepAwake.activateKeepAwakeAsync("");
+      // await Audio.setAudioModeAsync({
+      //   staysActiveInBackground: true,
+      //   shouldDuckAndroid: true,
+      //   playThroughEarpieceAndroid: true,
+      //   allowsRecordingIOS: true,
+      //   playsInSilentModeIOS: true,
+      // });
       console.log("Wake lock acquired");
     } catch (err) {
       console.error("Error acquiring wake lock:", err);
@@ -160,48 +214,75 @@ const HomeScreen = () => {
       console.error("Error while starting the recording:", error);
     }
   };
-
-  const togglePlayStop = async (recordIndex) => {
+  const toggleStop = async () => {
+    if (isPlayingg) {
+      await releaseWakeLock();
+      await stopSound();
+    }
+  };
+  const togglePlay = async (recordIndex, stop) => {
+    let again = "";
+    if (stop == "stop") return;
     try {
       //if (sound) {
-      var shouldPlay = isPlaying;
-      console.log("isPlaying" + isPlaying);
+      var shouldPlay = isPlayingg;
+      console.log("isPlaying" + isPlayingg);
       await setupAudio(); // Ensure audio is set up for background playback
 
-      if (isPlaying) {
-        setIsPlaying(false);
-        await releaseWakeLock();
-        await stopSound();
-      } else {
-        await setIsPlaying(true);
-        shouldPlay = true;
-        if (typeof recordIndex === "number") {
-          await requestWakeLock();
-          console.log("recordIndex  " + JSON.stringify(recordIndex));
-          const selectedRecording = recordingsList[recordIndex];
-          var first = true;
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: selectedRecording.fileUri },
-            {},
-            (status) => {
-              if ((status.shouldPlay && isPlaying) || first) {
-                first = false;
-                const delayInSeconds =
-                  delayUnit === "seconds"
-                    ? parseInt(repeatDelay)
-                    : parseInt(repeatDelay) * 60;
-                setTimeout(() => {
-                  sound.replayAsync();
-                }, delayInSeconds * 1000);
-              }
-            }
-          );
-          setSound(sound);
+      shouldPlay = true;
+      if (typeof recordIndex === "number") {
+        //  await requestWakeLock();
+        console.log("recordIndex  " + JSON.stringify(recordIndex));
+        const selectedRecording = recordingsList[recordIndex];
+        console.log(
+          "test" +
+            selectedRecording.fileUri +
+            " " +
+            selectedRecording.name +
+            " " +
+            recordIndex
+        );
 
-          await sound.replayAsync();
-        } else {
-          await sound.replayAsync();
-        }
+        var first = true;
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: selectedRecording.fileUri },
+          {},
+          (status) => {
+            console.log(
+              "f11inished playing song " +
+                delayUnit +
+                "  is playing " +
+                isPlayingg +
+                " first" +
+                first
+              //   + JSON.stringify(status)
+            );
+            if (isPlayingg || first) {
+              clearInterval(intervalIdRef.current);
+              intervalIdRef.current = null;
+              first = false;
+
+              console.log(
+                "finished playing song after if " +
+                  delayUnit +
+                  "  isPlaying " +
+                  isPlayingg
+              );
+              const delayInSeconds =
+                delayUnit === "seconds"
+                  ? parseInt(repeatDelay)
+                  : parseInt(repeatDelay) * 60;
+              intervalIdRef.current = setTimeout(() => {
+                sound.replayAsync();
+              }, delayInSeconds * 1000);
+            }
+          }
+        );
+        setSound(sound);
+        //await togglePlay(recordIndex, again);
+        await sound.replayAsync();
+      } else {
+        if (sound) await sound.replayAsync();
       }
       //   }
     } catch (error) {
@@ -214,12 +295,12 @@ const HomeScreen = () => {
       if (sound) {
         await sound.stopAsync();
         await sound.setPositionAsync(0);
-        setIsPlaying(false);
+        setIsPlayingg(false);
       }
     } catch (error) {
       console.log("Error stopping sound:", error);
 
-      setIsPlaying(false);
+      //setIsPlaying(false);
     }
   };
 
@@ -422,10 +503,12 @@ const HomeScreen = () => {
               styles.playButton,
               !selectedRecordingIndex && styles.disabledButton,
             ]}
-            onPress={togglePlayStop}
+            onPress={() => (isPlayingg ? setIsPlayingg(false) : togglePlay)}
             disabled={!selectedRecordingIndex}
           >
-            <Text style={styles.buttonText}>{isPlaying ? "Stop" : "Play"}</Text>
+            <Text style={styles.buttonText}>
+              {isPlayingg ? "Stop" : "Play"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -484,8 +567,21 @@ const HomeScreen = () => {
               <TouchableOpacity
                 key={index}
                 onPress={async () => {
-                  setSelectedRecordingIndex(index);
-                  await togglePlayStop(index);
+                  try {
+                    setIsPlayingg(true);
+                    setSelectedRecordingIndex(index); // Set the selected index
+                    console.log(
+                      "on pressssss " +
+                        index +
+                        "oooo " +
+                        selectedRecordingIndex +
+                        "  ooo   " +
+                        isPlayingg
+                    );
+                    // Update isPlaying state with a callback to ensure completion
+                  } catch (error) {
+                    console.error("Error in onPress:", error); // Handle other errors
+                  }
                 }}
               >
                 <View
