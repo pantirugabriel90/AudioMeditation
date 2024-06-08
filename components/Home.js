@@ -84,7 +84,6 @@ const HomeScreen = () => {
     });
   });
   useEffect(() => {
-    console.log("useEffect triggered");
     const playAudio = async () => {
       console.log("playAudio");
       if (isPlayingg && sound) {
@@ -96,7 +95,6 @@ const HomeScreen = () => {
               ? parseInt(repeatDelay)
               : parseInt(repeatDelay) * 60;
 
-          // **Clear existing interval before creating a new one**
           clearInterval(intervalIdRef.current);
           intervalIdRef.current = setTimeout(() => {
             playAudio();
@@ -114,14 +112,11 @@ const HomeScreen = () => {
             " " +
             selectedRecordingIndex
         );
-        // Clear interval if isPlaying is false or sound is unavailable
         clearInterval(intervalIdRef.current);
         intervalIdRef.current = null;
       }
     };
     playAudio();
-    console.log("MARE OM MARE CARACTER");
-    // Cleanup function to clear interval on unmount
     return () => clearInterval(intervalIdRef.current);
   }, [isPlayingg, sound]);
   const setupAudio = async () => {
@@ -308,7 +303,6 @@ const HomeScreen = () => {
           alert("Please enter a name for the recording.");
           return;
         }
-
         const uri = await temporary.getURI();
 
         const fileUri = `${FileSystem.documentDirectory}${recordingName}.wav`;
@@ -331,13 +325,14 @@ const HomeScreen = () => {
     }
   };
 
-  const handleDeleteRecording = (index) => {
+  const handleDeleteRecording = async (index) => {
     const updatedRecordings = [...recordingsList];
     updatedRecordings.splice(index, 1);
     setRecordingsList(updatedRecordings);
-    setSelectedRecordingIndex(null); // Clear the selected index
-    // Perform any additional actions (e.g., delete the file, update storage, etc.)
-    // ...
+    setSelectedRecordingIndex(null);
+
+    const updatedRecordsString = JSON.stringify(updatedRecordings);
+    await AsyncStorage.setItem("memorizedRecords", updatedRecordsString);
   };
 
   const loadMemorizedRecording = async () => {
@@ -380,49 +375,6 @@ const HomeScreen = () => {
       }
     } catch (error) {
       console.log("Error loading memorized recordings:", error);
-    }
-  };
-
-  const replayRecording = async (specificRecording) => {
-    try {
-      await stopSound();
-      if (sound) await sound.stopAsync();
-      const delaySettings = await AsyncStorage.getItem("delaySettings");
-      console.log(delaySettings);
-      if (delaySettings) {
-        const { repeatDelay: savedRepeatDelay, delayUnit: savedDelayUnit } =
-          JSON.parse(delaySettings);
-
-        setRepeatDelay(savedRepeatDelay);
-        setDelayUnit(savedDelayUnit);
-        console.log("specificRecording" + specificRecording);
-        let memorizedURI = specificRecording
-          ? specificRecording.fileUri
-          : await AsyncStorage.getItem("memorizedRecording");
-
-        if (memorizedURI) {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: memorizedURI },
-            {},
-            (status) => {
-              if (status.didJustFinish) {
-                const delayInSeconds =
-                  savedDelayUnit === "seconds"
-                    ? parseInt(savedRepeatDelay)
-                    : parseInt(savedRepeatDelay) * 60;
-                setTimeout(() => {
-                  sound.replayAsync();
-                }, delayInSeconds * 1000);
-              }
-            }
-          );
-
-          setSound(sound);
-        }
-        console.log("what is here");
-      }
-    } catch (error) {
-      console.log("Error replaying recording:", error);
     }
   };
   const requestDiskPermissions = async () => {
