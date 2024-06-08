@@ -40,6 +40,7 @@ const HomeScreen = () => {
   const [temporary, setTemporary] = useState(null);
   const [sound, setSound] = useState();
   const [isPlayingg, setIsPlayingg] = useState(false);
+  const [recordingToBeSaved, setRecordingToBeSaved] = useState(false);
   const [repeatDelay, setRepeatDelay] = useState("5");
   const [delayUnit, setDelayUnit] = useState("seconds");
   const [recordingsList, setRecordingsList] = useState([]);
@@ -155,6 +156,7 @@ const HomeScreen = () => {
   };
   const toggleRecording = async () => {
     try {
+      setRecordingToBeSaved(true);
       // alert("bfore calling requestPermissions");
       //await requestMicrophonePermissions();  try {
       console.log("Requesting permissions..");
@@ -315,6 +317,8 @@ const HomeScreen = () => {
         );
 
         setRecordingName("");
+
+        setRecordingToBeSaved(false);
       } else {
         console.log("recording is null");
       }
@@ -487,18 +491,20 @@ const HomeScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.addButton]}
+            style={[styles.addButton, recordingName && styles.greenButton]}
             onPress={memorizeRecording}
           >
-            <Text style={styles.addButtonText}>Save Recording</Text>
+            <Text style={[styles.addButtonText]}>Save Recording</Text>
           </TouchableOpacity>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter recording name"
-          value={recordingName}
-          onChangeText={(text) => setRecordingName(text)}
-        />
+        {recordingToBeSaved && (
+          <TextInput
+            style={styles.input}
+            placeholder="Enter recording name"
+            value={recordingName}
+            onChangeText={(text) => setRecordingName(text)}
+          />
+        )}
         <View style={styles.delayContainer}>
           <Text style={styles.label}>Replay delay:</Text>
           <TextInput
