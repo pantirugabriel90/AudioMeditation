@@ -622,6 +622,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: design.colors.buttonTextColor,
     fontSize: 16,
+    marginTop: 3,
     fontWeight: "bold",
   },
   input: {
