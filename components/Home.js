@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
+  Dimensions,
   Image,
 } from "react-native";
 
@@ -30,6 +31,9 @@ import {
 
 import * as design from "./common/styles";
 import * as KeepAwake from "expo-keep-awake";
+
+const windowWidth = Dimensions.get("window").width; // Get screen width
+
 const HomeScreen = () => {
   const [selectedRecordingIndex, setSelectedRecordingIndex] = useState(null);
   const [recording, setRecording] = useState(null);
@@ -398,7 +402,6 @@ const HomeScreen = () => {
         console.error("Error parsing saved delay settings:", error);
       }
 
-      // Set state values using setter functions
       setRepeatDelay(savedSettings.delay || "5"); // Set default to 5
       setDelayUnit(savedSettings.savedUnit || "seconds"); // Set default to "seconds"
     } catch (error) {
@@ -478,6 +481,12 @@ const HomeScreen = () => {
             <Text style={styles.addButtonText}>Save Recording</Text>
           </TouchableOpacity>
         </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter recording name"
+          value={recordingName}
+          onChangeText={(text) => setRecordingName(text)}
+        />
         <View style={styles.delayContainer}>
           <Text style={styles.label}>Replay delay:</Text>
           <TextInput
@@ -517,12 +526,7 @@ const HomeScreen = () => {
             </View>
           </View>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter recording name"
-          value={recordingName}
-          onChangeText={(text) => setRecordingName(text)}
-        />
+
         {!isKeyboardVisible && (
           <View style={styles.recordingsListContainer}>
             <Text style={[styles.addButtonText, { fontSize: 22 }]}>
@@ -574,6 +578,22 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  recordingsListContainer: {
+    height: "60%",
+  },
+  recordingItemContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 5, // Adjust spacing for vertical alignment
+    backgroundColor: "white",
+    borderRadius: 5,
+    marginTop: 5,
+    width: windowWidth * 0.65,
+  },
+  recordingsListTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "pink",
+  },
   subContainer: {
     backgroundColor: "white",
     borderRadius: 7,
@@ -587,9 +607,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     borderRadius: 10,
-    width: 250,
+    width: windowWidth * 0.85,
   },
   deleteIcon: {
     fontSize: 20,
@@ -725,26 +744,6 @@ const styles = StyleSheet.create({
   radioButtonSelected: {
     backgroundColor: "#ffcc00",
   },
-  recordingsListContainer: {
-    alignItems: "right",
-  },
-  recordingsListTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "pink",
-  },
-  recordingItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 5, // Adjust spacing for vertical alignment
-    backgroundColor: "white",
-    borderRadius: 5,
-    marginTop: 5,
-    width: 200,
-  },
-
   recordingItem: {
     fontSize: 16,
     marginBottom: 5,
