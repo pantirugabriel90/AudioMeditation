@@ -41,12 +41,6 @@ const HomeScreen = () => {
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
   const intervalIdRef = useRef(null); // Create useRef for interval ID
-  // useEffect(() => {
-  //   if (isPlaying) {
-  //     console.log("isPlayying record index " + selectedRecordingIndex);
-  //     togglePlay(selectedRecordingIndex);
-  //   } else toggleStop(selectedRecordingIndex);
-  // }, [isPlaying, selectedRecordingIndex]);
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
@@ -74,7 +68,7 @@ const HomeScreen = () => {
   }, []);
   useEffect(() => {
     requestDiskPermissions();
-    loadMemorizedRecording();
+    loadLocalData();
   }, []);
   useFocusEffect(() => {
     loadSelectedImage().then((storedImage) => {
@@ -334,15 +328,30 @@ const HomeScreen = () => {
     const updatedRecordsString = JSON.stringify(updatedRecordings);
     await AsyncStorage.setItem("memorizedRecords", updatedRecordsString);
   };
+  const saveDelay = async (delay, unit) => {
+    try {
+      if (!/^\d*\.?\d*$/.test(delay)) return;
+      setRepeatDelay(delay);
+      var savedUnit =
+        unit === "minutes" || unit === "seconds" ? unit : delayUnit;
+      var delaySettings = JSON.stringify({ delay, savedUnit });
 
-  const loadMemorizedRecording = async () => {
+      console.log("delay" + delaySettings);
+
+      if (delay) await AsyncStorage.setItem("delaySettings", delaySettings);
+    } catch (error) {
+      console.error("Error saving delay settings:", error);
+    }
+  };
+
+  const loadLocalData = async () => {
     try {
       await stopSound();
       if (sound) await sound.stopAsync();
       const readStoragePermission = await PermissionsAndroid.check(
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
       );
-
+      await loadDelaySettings();
       if (!readStoragePermission) {
         console.log("Permissions for reading external storage not granted.");
         return;
@@ -377,6 +386,26 @@ const HomeScreen = () => {
       console.log("Error loading memorized recordings:", error);
     }
   };
+  const loadDelaySettings = async () => {
+    try {
+      const savedSettingsString = await AsyncStorage.getItem("delaySettings");
+
+      // Parse saved settings (handle potential parsing errors)
+      let savedSettings = {};
+      try {
+        savedSettings = JSON.parse(savedSettingsString) || {};
+      } catch (error) {
+        console.error("Error parsing saved delay settings:", error);
+      }
+
+      // Set state values using setter functions
+      setRepeatDelay(savedSettings.delay || "5"); // Set default to 5
+      setDelayUnit(savedSettings.savedUnit || "seconds"); // Set default to "seconds"
+    } catch (error) {
+      console.error("Error loading delay settings from AsyncStorage:", error);
+    }
+  };
+
   const requestDiskPermissions = async () => {
     let logMessage = ""; // To store log messages
     try {
@@ -408,22 +437,6 @@ const HomeScreen = () => {
       alert(error.message);
       alert("Disk permissions not granted:\n" + logMessage); // Display all permission results in an alert
       console.error("Error requesting disk permissions:", error);
-    }
-  };
-
-  const saveDelay = async (delay) => {
-    try {
-      if (!/^\d*\.?\d*$/.test(delay)) return;
-
-      console.log("delay" + delay);
-      setRepeatDelay(delay);
-      if (delay)
-        await AsyncStorage.setItem(
-          "delaySettings",
-          JSON.stringify({ delay, delayUnit })
-        );
-    } catch (error) {
-      console.error("Error saving delay settings:", error);
     }
   };
 
@@ -481,7 +494,10 @@ const HomeScreen = () => {
               <RadioButton
                 value="minutes"
                 status={delayUnit === "minutes" ? "checked" : "unchecked"}
-                onPress={() => setDelayUnit("minutes")}
+                onPress={async () => {
+                  setDelayUnit("minutes");
+                  saveDelay(repeatDelay, "minutes");
+                }}
                 color={design.colors.buttonBackgroundColor}
               />
               <Text style={styles.radioButtonLabel}>Minutes</Text>
@@ -490,7 +506,11 @@ const HomeScreen = () => {
               <RadioButton
                 value="seconds"
                 status={delayUnit === "seconds" ? "checked" : "unchecked"}
-                onPress={() => setDelayUnit("seconds")}
+                onPress={() => {
+                  setDelayUnit("seconds");
+
+                  saveDelay(repeatDelay, "seconds");
+                }}
                 color={design.colors.buttonBackgroundColor}
               />
               <Text style={styles.radioButtonLabel}>Seconds</Text>
