@@ -452,7 +452,11 @@ const HomeScreen = () => {
       <View style={styles.container}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            style={[styles.addButton]}
+            style={[
+              styles.addButton,
+              !recording && styles.greenButton,
+              recording && styles.redButton,
+            ]}
             onPress={toggleRecording}
           >
             <Text style={styles.addButtonText}>
@@ -465,8 +469,16 @@ const HomeScreen = () => {
               styles.button,
               styles.playButton,
               selectedRecordingIndex === null && styles.disabledButton,
+              isPlayingg && styles.redButton,
             ]}
-            onPress={() => (isPlayingg ? setIsPlayingg(false) : togglePlay)}
+            onPress={() => {
+              if (isPlayingg) {
+                setIsPlayingg(false);
+              } else {
+                setIsPlayingg(true);
+                // togglePlay(selectedRecordingIndex);
+              }
+            }}
             disabled={selectedRecordingIndex === null}
           >
             <Text style={styles.buttonText}>
@@ -631,6 +643,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginLeft: 10,
   },
+  greenButton: {
+    backgroundColor: "#00e500",
+  },
+  redButton: {
+    backgroundColor: "red",
+  },
   addButtonText: {
     color: design.colors.buttonTextColor,
     fontSize: 16,
@@ -649,7 +667,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   disabledButton: {
-    backgroundColor: "gray", // Style for disabled button
+    backgroundColor: design.colors.buttonBackgroundColor,
   },
   numberInput: {
     width: "25%",
@@ -704,11 +722,8 @@ const styles = StyleSheet.create({
   enterButton: {
     backgroundColor: "#ffcc00",
   },
-  recordButton: {
-    backgroundColor: "#ff0000",
-  },
   playButton: {
-    backgroundColor: "#00ff00",
+    backgroundColor: "#00e500",
     marginLeft: 10,
   },
   memorizeButton: {
