@@ -496,10 +496,10 @@ const HomeScreen = () => {
             style={[
               styles.button,
               styles.playButton,
-              !selectedRecordingIndex && styles.disabledButton,
+              selectedRecordingIndex === null && styles.disabledButton,
             ]}
             onPress={() => (isPlayingg ? setIsPlayingg(false) : togglePlay)}
-            disabled={!selectedRecordingIndex}
+            disabled={selectedRecordingIndex === null}
           >
             <Text style={styles.buttonText}>
               {isPlayingg ? "Stop" : "Play"}
