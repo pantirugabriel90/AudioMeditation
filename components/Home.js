@@ -557,42 +557,50 @@ const HomeScreen = () => {
               Recordings List:
             </Text>
             {recordingsList.map((recording, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={async () => {
-                  try {
-                    setIsPlayingg(true);
-                    setSelectedRecordingIndex(index); // Set the selected index
-                    console.log(
-                      "on pressssss " +
-                        index +
-                        "oooo " +
-                        selectedRecordingIndex +
-                        "  ooo   " +
-                        isPlayingg
-                    );
-                    // Update isPlaying state with a callback to ensure completion
-                  } catch (error) {
-                    console.error("Error in onPress:", error); // Handle other errors
-                  }
-                }}
-              >
-                <View
-                  style={[
-                    styles.recordingItemContainer,
-                    selectedRecordingIndex === index &&
-                      styles.selectedRecording,
-                  ]}
+              <View style={styles.mainContainer}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={async () => {
+                    try {
+                      setIsPlayingg(true);
+                      setSelectedRecordingIndex(index); // Set the selected index
+                      console.log(
+                        "on pressssss " +
+                          index +
+                          "oooo " +
+                          selectedRecordingIndex +
+                          "  ooo   " +
+                          isPlayingg
+                      );
+                      // Update isPlaying state with a callback to ensure completion
+                    } catch (error) {
+                      console.error("Error in onPress:", error); // Handle other errors
+                    }
+                  }}
                 >
-                  <Text style={styles.recordingItem}>{recording.name}</Text>
+                  <View
+                    style={[
+                      styles.recordingItemContainer,
+                      selectedRecordingIndex === index &&
+                        styles.selectedRecording,
+                    ]}
+                  >
+                    <Text style={styles.recordingItem}>{recording.name}</Text>
 
-                  <Icon
-                    name="delete-forever"
-                    style={styles.deleteIcon}
-                    onPress={() => handleDeleteRecording(index)}
-                  />
-                </View>
-              </TouchableOpacity>
+                    <Icon
+                      name="delete-forever"
+                      style={styles.deleteIcon}
+                      onPress={() => handleDeleteRecording(index)}
+                    />
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.subContainer}
+                  onPress={() => handleDeleteRecording(index)}
+                >
+                  <Icon name="delete-forever" style={styles.deleteIcon} />
+                </TouchableOpacity>
+              </View>
             ))}
           </View>
         )}
@@ -602,6 +610,28 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  subContainer: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 8,
+    marginTop: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 50,
+    marginLeft: 10,
+  },
+  mainContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 10,
+    width: 250,
+  },
+  deleteIcon: {
+    margin: 5,
+    fontSize: 24,
+    color: "red",
+  },
   container: {
     flex: 1,
   },
@@ -749,6 +779,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 5,
     marginTop: 5,
+    width: 200,
   },
 
   recordingItem: {
