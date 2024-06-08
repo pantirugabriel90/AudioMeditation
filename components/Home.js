@@ -557,9 +557,8 @@ const HomeScreen = () => {
               Recordings List:
             </Text>
             {recordingsList.map((recording, index) => (
-              <View style={styles.mainContainer}>
+              <View style={styles.mainContainer} key={index}>
                 <TouchableOpacity
-                  key={index}
                   onPress={async () => {
                     try {
                       setIsPlayingg(true);
@@ -572,7 +571,6 @@ const HomeScreen = () => {
                           "  ooo   " +
                           isPlayingg
                       );
-                      // Update isPlaying state with a callback to ensure completion
                     } catch (error) {
                       console.error("Error in onPress:", error); // Handle other errors
                     }
@@ -586,12 +584,6 @@ const HomeScreen = () => {
                     ]}
                   >
                     <Text style={styles.recordingItem}>{recording.name}</Text>
-
-                    <Icon
-                      name="delete-forever"
-                      style={styles.deleteIcon}
-                      onPress={() => handleDeleteRecording(index)}
-                    />
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -612,9 +604,9 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   subContainer: {
     backgroundColor: "white",
-    borderRadius: 10,
+    borderRadius: 7,
     padding: 8,
-    marginTop: 2,
+    marginTop: 5,
     alignItems: "center",
     justifyContent: "center",
     width: 50,
@@ -628,8 +620,7 @@ const styles = StyleSheet.create({
     width: 250,
   },
   deleteIcon: {
-    margin: 5,
-    fontSize: 24,
+    fontSize: 20,
     color: "red",
   },
   container: {
@@ -786,12 +777,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
     color: "green",
-  },
-
-  deleteIcon: {
-    color: "black",
-    fontSize: 20,
-    // Adjust spacing between delete and replace icons
   },
 
   replaceIcon: {
