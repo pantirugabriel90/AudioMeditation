@@ -221,10 +221,7 @@ const HomeScreen = () => {
     }
   };
   const togglePlay = async (recordIndex, stop) => {
-    let again = "";
-    if (stop == "stop") return;
     try {
-      //if (sound) {
       var shouldPlay = isPlayingg;
       console.log("isPlaying" + isPlayingg);
       await setupAudio(); // Ensure audio is set up for background playback
@@ -300,7 +297,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.log("Error stopping sound:", error);
 
-      //setIsPlaying(false);
+      setIsPlaying(false);
     }
   };
 
@@ -464,22 +461,20 @@ const HomeScreen = () => {
 
   const saveDelay = async (delay) => {
     try {
+      if (!/^\d*\.?\d*$/.test(delay)) return;
+
       console.log("delay" + delay);
       setRepeatDelay(delay);
-      await AsyncStorage.setItem(
-        "delaySettings",
-        JSON.stringify({ delay, delayUnit })
-      );
-
-      replayRecording();
+      if (delay)
+        await AsyncStorage.setItem(
+          "delaySettings",
+          JSON.stringify({ delay, delayUnit })
+        );
     } catch (error) {
       console.error("Error saving delay settings:", error);
     }
   };
-  <View style={commonStyles.centerContainer}>
-    <Text>Home</Text>
-    {/* Your Home screen content */}
-  </View>;
+
   return (
     <ImageBackground
       source={design.backgroundImage}
@@ -524,9 +519,7 @@ const HomeScreen = () => {
             style={styles.numberInput}
             value={repeatDelay}
             onChangeText={(text) => {
-              if (text && /^\d*\.?\d*$/.test(text)) {
-                saveDelay(text);
-              }
+              saveDelay(text);
             }}
             keyboardType="numeric"
           />
