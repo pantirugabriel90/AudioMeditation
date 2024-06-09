@@ -504,6 +504,7 @@ const HomeScreen = () => {
             style={styles.input}
             placeholder="Enter recording name"
             value={recordingName}
+            maxLength={25}
             onChangeText={(text) => setRecordingName(text)}
           />
         )}
