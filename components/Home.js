@@ -598,7 +598,12 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
   recordingsListContainer: {
-    height: "60%",
+    backgroundColor: "rgba(17, 40, 120, 0.5)",
+    minHeight: "60%",
+    padding: 10,
+    paddingBottom: 25,
+    marginBottom: -30,
+    borderRadius: 5,
   },
   recordingItemContainer: {
     paddingHorizontal: 10,
