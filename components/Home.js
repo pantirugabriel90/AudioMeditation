@@ -592,6 +592,7 @@ const HomeScreen = () => {
                             styles.selectedRecording,
                         ]}
                       >
+                        <Icon name="play-box" style={styles.playIcon} />
                         <Text style={styles.recordingItem}>
                           {recording.name}
                         </Text>
@@ -683,6 +684,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5, // Adjust spacing for vertical alignment
     backgroundColor: "white",
+    flexDirection: "row",
     borderRadius: 5,
     marginTop: 5,
     width: windowWidth * 0.65,
@@ -711,6 +713,11 @@ const styles = StyleSheet.create({
   deleteIcon: {
     fontSize: 20,
     color: "red",
+  },
+  playIcon: {
+    fontSize: 24,
+    color: "#00e500",
+    marginRight: 10,
   },
   container: {
     flex: 1,
@@ -846,9 +853,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffcc00",
   },
   recordingItem: {
+    marginRight: 10,
     fontSize: 16,
     marginBottom: 5,
-    color: "green",
+    color: design.colors.purple1,
   },
 
   replaceIcon: {
