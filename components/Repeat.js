@@ -27,6 +27,7 @@ const Repeat = () => {
   );
 
   const [inputText, setInputText] = useState("");
+  const [tempSpeechRate, setTempSpeechRate] = useState("1.0");
   const [spokenText, setSpokenText] = useState("");
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
@@ -36,10 +37,12 @@ const Repeat = () => {
         const savedText = await AsyncStorage.getItem("inputText");
         const savedDelay = await AsyncStorage.getItem("delayRepeat");
         const savedRate = await AsyncStorage.getItem("speechRate");
+        console.log("loading  speech rate majestically: " + savedRate);
 
         setInputText(savedText || "");
         setDelayRepeat(parseFloat(savedDelay) || 5);
         setSpeechRate(parseFloat(savedRate) || 1.0);
+        setTempSpeechRate(parseFloat(savedRate) || 1.0);
       } catch (error) {
         console.log("Error loading data from AsyncStorage:", error);
       }
@@ -158,7 +161,15 @@ const Repeat = () => {
       prevColor === "#ff9900" ? "#00ff00" : "#ff9900"
     );
   };
-
+  const saveDelay = async (delay) => {
+    try {
+      if (!/^\d*\.?\d*$/.test(delay)) return;
+      var result = parseFloat(delay);
+      setDelayRepeat(result ? result : 0);
+    } catch (error) {
+      console.error("Error saving delay settings:", error);
+    }
+  };
   return (
     <ImageBackground
       source={design.backgroundImage}
@@ -191,12 +202,14 @@ const Repeat = () => {
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.numberInput}
-            value={speechRate.toString()}
-            onChangeText={(text) => {
-              // Ensure the entered value is a number or float between 0.25 and 2
-              const rate = parseFloat(text);
+            value={tempSpeechRate.toString()}
+            onChangeText={(text) => setTempSpeechRate(text)}
+            onEndEditing={() => {
+              const rate = parseFloat(tempSpeechRate);
               if (rate >= 0 && rate <= 2) {
-                setSpeechRate(rate.toFixed(2)); // Limit to 2 decimal places
+                setSpeechRate(rate);
+              } else {
+                setTempSpeechRate(speechRate.toString());
               }
             }}
             keyboardType="numeric"
