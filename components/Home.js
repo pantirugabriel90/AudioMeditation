@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Dimensions,
   Image,
+  ScrollView,
 } from "react-native";
 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -548,47 +549,83 @@ const HomeScreen = () => {
 
         {!isKeyboardVisible && (
           <View style={styles.recordingsListContainer}>
-            <Text style={[styles.addButtonText, { fontSize: 22 }]}>
-              Mantras:
-            </Text>
-            {recordingsList.map((recording, index) => (
-              <View style={styles.mainContainer} key={index}>
-                <TouchableOpacity
-                  onPress={async () => {
-                    try {
-                      setIsPlayingg(true);
-                      setSelectedRecordingIndex(index); // Set the selected index
-                      console.log(
-                        "on pressssss " +
-                          index +
-                          "oooo " +
-                          selectedRecordingIndex +
-                          "  ooo   " +
-                          isPlayingg
-                      );
-                    } catch (error) {
-                      console.error("Error in onPress:", error); // Handle other errors
-                    }
-                  }}
+            <View style={styles.centeredContainer}>
+              <Text style={[styles.addButtonText, { fontSize: 22 }]}>
+                Mantras:
+              </Text>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              {recordingsList.map((recording, index) => (
+                <View
+                  key={index}
+                  style={[
+                    index % 2 === 1
+                      ? styles.lightBackground
+                      : styles.darkBackground,
+                  ]}
                 >
-                  <View
-                    style={[
-                      styles.recordingItemContainer,
-                      selectedRecordingIndex === index &&
-                        styles.selectedRecording,
-                    ]}
-                  >
-                    <Text style={styles.recordingItem}>{recording.name}</Text>
+                  <View style={[styles.mainContainer]}>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        try {
+                          setIsPlayingg(true);
+                          setSelectedRecordingIndex(index); // Set the selected index
+                          console.log(
+                            "on pressssss " +
+                              index +
+                              "oooo " +
+                              selectedRecordingIndex +
+                              "  ooo   " +
+                              isPlayingg
+                          );
+                        } catch (error) {
+                          console.error("Error in onPress:", error); // Handle other errors
+                        }
+                      }}
+                    >
+                      <View
+                        style={[
+                          styles.recordingItemContainer,
+                          selectedRecordingIndex === index &&
+                            styles.selectedRecording,
+                        ]}
+                      >
+                        <Text style={styles.recordingItem}>
+                          {recording.name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.subContainer}
+                      onPress={() => handleDeleteRecording(index)}
+                    >
+                      <Icon name="delete-forever" style={styles.deleteIcon} />
+                    </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.subContainer}
-                  onPress={() => handleDeleteRecording(index)}
+                </View>
+              ))}
+
+              {Array.from({
+                length: Math.max(7 - recordingsList.length, 0),
+              }).map((_, index) => (
+                <View
+                  key={`empty-${index}`}
+                  style={[
+                    (recordingsList.length + index) % 2 === 0
+                      ? styles.lightBackground
+                      : styles.darkBackground,
+                    styles.rowContainer,
+                  ]}
                 >
-                  <Icon name="delete-forever" style={styles.deleteIcon} />
-                </TouchableOpacity>
-              </View>
-            ))}
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>
+                      Add your recording here...
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
           </View>
         )}
       </View>
@@ -597,13 +634,49 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  scrollViewContent: {},
+  centeredContainer: {
+    alignItems: "center",
+  },
+  emptyContainer: {
+    borderRadius: 10,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    width: windowWidth * 0.75,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "gray",
+    fontStyle: "italic",
+  },
+  lightBackground: {
+    // backgroundColor: "rgba(17, 40, 120, 0.5)",
+
+    backgroundColor: "rgba(17, 40, 120, 0.5)",
+    paddingLeft: 8,
+    paddingRight: 8,
+    borderRadius: 10,
+    paddingBottom: 3,
+    marginTop: 3,
+  },
+  darkBackground: {
+    backgroundColor: "rgba(17, 40, 120, 0.5)",
+    paddingLeft: 8,
+    paddingRight: 8,
+    borderRadius: 10,
+    marginTop: 3,
+    paddingBottom: 5,
+  },
   recordingsListContainer: {
     backgroundColor: "rgba(17, 40, 120, 0.5)",
     minHeight: "60%",
+    maxHeight: "63%",
     padding: 10,
+    minWidth: "100%",
     paddingBottom: 25,
     marginBottom: -30,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   recordingItemContainer: {
     paddingHorizontal: 10,
@@ -625,14 +698,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
     alignItems: "center",
     justifyContent: "center",
-    width: 50,
+    width: 40,
     marginLeft: 10,
   },
   mainContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     borderRadius: 10,
-    width: windowWidth * 0.85,
+    width: windowWidth * 0.75,
   },
   deleteIcon: {
     fontSize: 20,

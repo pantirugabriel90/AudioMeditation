@@ -4,7 +4,7 @@ import HomeScreen from "./components/Home";
 import Repeat from "./components/Repeat"; // Corrected import statement
 import { Ionicons } from "@expo/vector-icons";
 import Settings from "./components/Settings";
-import { View, Text, StyleSheet, Button } from "react-native";
+import { View, Text, StyleSheet, Button, StatusBar } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import * as design from "./components/common/styles";
@@ -51,6 +51,7 @@ const App = () => {
   }
   return (
     <NavigationContainer>
+      <StatusBar backgroundColor="white" barStyle="dark-content" />
       <Tab.Navigator
         screenOptions={{
           headerTitleAlign: "center",
