@@ -207,8 +207,13 @@ const Repeat = () => {
         <TouchableOpacity
           style={[
             styles.button,
-            isSpeaking ? styles.stopButton : styles.addButton,
+            isSpeaking
+              ? styles.stopButton
+              : inputText
+              ? styles.greenButton
+              : styles.addButton,
           ]}
+          disabled={!inputText}
           onPress={isSpeaking ? stopSpeaking : speakText}
         >
           <Text style={styles.addButtonText}>
@@ -227,12 +232,16 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     marginLeft: 10,
+    marginTop: 3,
     marginBottom: 10,
   },
   addButtonText: {
     color: design.colors.buttonTextColor,
     fontSize: 16,
     fontWeight: "bold",
+  },
+  greenButton: {
+    backgroundColor: "#00e500",
   },
   inputContainer: {
     flexDirection: "row",
