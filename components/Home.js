@@ -493,6 +493,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             style={[styles.addButton, recordingName && styles.greenButton]}
             onPress={memorizeRecording}
+            disabled={!recordingName}
           >
             <Text style={[styles.addButtonText]}>Save Recording</Text>
           </TouchableOpacity>
@@ -548,7 +549,7 @@ const HomeScreen = () => {
         {!isKeyboardVisible && (
           <View style={styles.recordingsListContainer}>
             <Text style={[styles.addButtonText, { fontSize: 22 }]}>
-              Recordings List:
+              Mantras:
             </Text>
             {recordingsList.map((recording, index) => (
               <View style={styles.mainContainer} key={index}>
