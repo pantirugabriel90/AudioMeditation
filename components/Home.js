@@ -570,6 +570,13 @@ const HomeScreen = () => {
                     <TouchableOpacity
                       onPress={async () => {
                         try {
+                          if (
+                            selectedRecordingIndex == index &&
+                            isPlayingg == true
+                          ) {
+                            setIsPlayingg(false);
+                            return;
+                          }
                           setIsPlayingg(true);
                           setSelectedRecordingIndex(index); // Set the selected index
                           console.log(
@@ -592,7 +599,14 @@ const HomeScreen = () => {
                             styles.selectedRecording,
                         ]}
                       >
-                        <Icon name="play-box" style={styles.playIcon} />
+                        {!isPlayingg ? (
+                          <Icon name="play-box" style={styles.playIcon} />
+                        ) : (
+                          <Icon
+                            name="stop-circle-outline"
+                            style={styles.stopIcon}
+                          />
+                        )}
                         <Text style={styles.recordingItem}>
                           {recording.name}
                         </Text>
@@ -717,6 +731,11 @@ const styles = StyleSheet.create({
   playIcon: {
     fontSize: 24,
     color: "#00e500",
+    marginRight: 10,
+  },
+  stopIcon: {
+    fontSize: 24,
+    color: "red",
     marginRight: 10,
   },
   container: {
