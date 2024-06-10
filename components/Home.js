@@ -13,8 +13,8 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ProgressBar } from "@react-native-community/progress-bar-android";
+import * as Progress from "react-native-progress";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import { PermissionsAndroid } from "react-native";
@@ -47,11 +47,73 @@ const HomeScreen = () => {
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
   const intervalIdRef = useRef(null); // Create useRef for interval ID
+
+  const [progress, setProgress] = useState(0);
+  const [progress2, setProgress2] = useState(0);
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const calculateProgress = () => {
+    const delayInSeconds =
+      delayUnit === "seconds"
+        ? parseInt(repeatDelay)
+        : parseInt(repeatDelay) * 60;
 
+    const startTime = Date.now();
+    return setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const pr = Math.min(elapsed / delayInSeconds, 1);
+      setProgress(pr);
+      setProgress2(pr);
+      console.log("update progress", pr);
+      if (elapsed >= delayInSeconds) {
+        clearInterval(interval);
+        calculateProgress();
+        setProgress(0);
+      }
+    }, 100); // Adjust interval time to update more frequently
+  };
+  useEffect(() => {
+    let interval;
+
+    if (isPlayingg) {
+      interval = calculateProgress();
+    } else {
+      setProgress(0);
+    }
+
+    return () => clearInterval(interval);
+  }, [isPlayingg, repeatDelay, delayUnit]);
+  // useEffect(() => {
+  //   let interval;
+  //   const delayInSeconds =
+  //     delayUnit === "seconds"
+  //       ? parseInt(repeatDelay)
+  //       : parseInt(repeatDelay) * 60;
+
+  //   if (isPlayingg) {
+  //     const startTime = Date.now();
+  //     interval = setInterval(() => {
+  //       const elapsed = (Date.now() - startTime) / 1000;
+  //       var pr = Math.min(elapsed / delayInSeconds, 1);
+
+  //       setProgress(pr);
+  //       setProgress2(pr);
+  //       console.log("update progress" + progress + pr);
+  //       if (elapsed >= delayInSeconds) {
+  //         //   clearInterval(interval);
+  //         setProgress(0);
+  //       }
+  //     }, 2000);
+  //   } else {
+  //     //   setProgress(0);
+  //   }
+  //   return () => {
+  //     clearInterval(interval);
+  //     //  setProgress(0);
+  //   };
+  // }, [isPlayingg, repeatDelay, delayUnit]);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -293,7 +355,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.log("Error stopping sound:", error);
 
-      setIsPlaying(false);
+      setIsPlayingg(false);
     }
   };
 
@@ -499,6 +561,16 @@ const HomeScreen = () => {
             <Text style={[styles.addButtonText]}>Save Recording</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.progressBarContainer}>
+          <Progress.Bar
+            progress={progress}
+            width={300}
+            height={20}
+            color="#66FF66"
+            borderWidth={2}
+            borderColor="#000" // Outline color
+          />
+        </View>
         {recordingToBeSaved && (
           <TextInput
             style={styles.input}
@@ -650,7 +722,9 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  scrollViewContent: {},
+  progressBarContainer: {
+    width: "80%",
+  },
   centeredContainer: {
     alignItems: "center",
   },
