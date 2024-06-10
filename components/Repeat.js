@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ImageBackground,
 } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
 import * as KeepAwake from "expo-keep-awake";
@@ -229,6 +230,12 @@ const Repeat = () => {
           disabled={!inputText}
           onPress={isSpeaking ? stopSpeaking : speakText}
         >
+          {inputText &&
+            (!isSpeaking ? (
+              <Icon name="play-box" style={styles.playIcon} />
+            ) : (
+              <Icon name="stop-circle-outline" style={styles.stopIcon} />
+            ))}
           <Text style={styles.addButtonText}>
             {isSpeaking ? "Stop Speaking" : "Text to Speech"}
           </Text>
@@ -251,10 +258,8 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: design.colors.buttonTextColor,
     fontSize: 16,
+    marginBottom: 3,
     fontWeight: "bold",
-  },
-  greenButton: {
-    backgroundColor: "#00e500",
   },
   inputContainer: {
     flexDirection: "row",
@@ -273,7 +278,24 @@ const styles = StyleSheet.create({
     width: "20%",
     minWidth: 200,
   },
+  playIcon: {
+    fontSize: 24,
+    color: "rgba(255, 0, 0, 0.8)",
+    marginRight: 10,
+  },
+  stopIcon: {
+    fontSize: 24,
+    color: "rgba(0, 229, 0, 0.8)",
+    marginRight: 10,
+  },
+  greenButton: {
+    backgroundColor: "rgba(0, 229, 0, 0.8)",
+  },
+  stopButton: {
+    backgroundColor: "rgba(255, 0, 0, 0.8)",
+  },
   button: {
+    flexDirection: "row",
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
@@ -281,9 +303,6 @@ const styles = StyleSheet.create({
   },
   textToSpeechButton: {
     backgroundColor: "#0077cc",
-  },
-  stopButton: {
-    backgroundColor: "#ff0000",
   },
   repeatButton: {
     backgroundColor: "#ff9900",
