@@ -12,6 +12,7 @@ import * as Speech from "expo-speech";
 import { useFocusEffect } from "@react-navigation/native";
 import * as KeepAwake from "expo-keep-awake";
 import { Audio } from "expo-av";
+import * as Progress from "react-native-progress";
 import {
   saveSelectedImage,
   loadSelectedImage,
@@ -30,8 +31,39 @@ const Repeat = () => {
   const [inputText, setInputText] = useState("");
   const [tempSpeechRate, setTempSpeechRate] = useState("1.0");
   const [spokenText, setSpokenText] = useState("");
+  const [progress, setProgress] = useState(0);
+  const interval = useRef(null); // Create useRef for interval ID
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
+  const calculateProgress = () => {
+    const delayInSeconds = parseInt(delayRepeat);
+
+    const startTime = Date.now();
+    if (interval.Current) clearInterval(interval.Current);
+    interval.Current = setInterval(() => {
+      if (!isSpeaking) {
+        clearInterval(interval.Current);
+        return;
+      }
+      const elapsed = (Date.now() - startTime) / 1000;
+      const pr = Math.min(elapsed / delayInSeconds, 1);
+      setProgress(pr);
+      // console.log("update progress", pr + isPlayingg);
+      if (elapsed >= delayInSeconds) {
+        setProgress(0);
+        calculateProgress();
+      }
+    }, 1000); // Adjust interval time to update more frequently
+  };
+  useEffect(() => {
+    if (isSpeaking) {
+      calculateProgress();
+    } else {
+      setProgress(0);
+    }
+
+    return () => clearInterval(interval.Current);
+  }, [isSpeaking, delayRepeat]);
   useEffect(() => {
     const loadValues = async () => {
       try {
@@ -177,6 +209,19 @@ const Repeat = () => {
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
+      {
+        <View style={styles.progressBarContainer}>
+          <Progress.Bar
+            progress={progress}
+            width={300}
+            height={20}
+            color="#00e500"
+            borderWidth={2}
+            borderColor={design.colors.purple08} // Outline color
+            unfilledColor={design.colors.purple08} // The background color of the unfilled portion
+          />
+        </View>
+      }
       <TextInput
         style={styles.textInput}
         value={inputText}
@@ -246,6 +291,9 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  progressBarContainer: {
+    width: "80%",
+  },
   addButton: {
     backgroundColor: design.colors.buttonBackgroundColor,
     padding: 10,
@@ -280,7 +328,7 @@ const styles = StyleSheet.create({
   },
   playIcon: {
     fontSize: 24,
-    color: "rgba(255, 0, 0, 0.8)",
+    color: design.colors.purple1,
     marginRight: 10,
   },
   stopIcon: {
