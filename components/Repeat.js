@@ -13,6 +13,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as KeepAwake from "expo-keep-awake";
 import { Audio } from "expo-av";
 import * as Progress from "react-native-progress";
+import { translate } from "./multilanguage/languageService"; // Adjust the import path as necessary
 import {
   saveSelectedImage,
   loadSelectedImage,
@@ -226,10 +227,10 @@ const Repeat = () => {
         style={styles.textInput}
         value={inputText}
         onChangeText={(text) => setInputText(text)}
-        placeholder="Enter your text here"
+        placeholder={translate("enterText")}
       />
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Delay in seconds:</Text>
+        <Text style={styles.label}>{translate("delayInSeconds")}</Text>
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.numberInput}
@@ -244,7 +245,7 @@ const Repeat = () => {
         </View>
       </View>
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Speech Rate:</Text>
+        <Text style={styles.label}>{translate("speechRate")}</Text>
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.numberInput}
@@ -282,7 +283,7 @@ const Repeat = () => {
               <Icon name="stop-circle-outline" style={styles.stopIcon} />
             ))}
           <Text style={styles.addButtonText}>
-            {isSpeaking ? "Stop Speaking" : "Text to Speech"}
+            {isSpeaking ? translate("stopSpeaking") : translate("textToSpeech")}
           </Text>
         </TouchableOpacity>
       </View>

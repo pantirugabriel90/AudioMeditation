@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Settings from "./components/Settings";
 import { View, Text, StyleSheet, Button, StatusBar } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { initLocalization } from "./components/multilanguage/languageService"; // Adjust the import path as necessary
 
 import * as design from "./components/common/styles";
 const Tab = createBottomTabNavigator();

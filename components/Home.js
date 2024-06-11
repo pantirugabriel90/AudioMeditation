@@ -13,6 +13,8 @@ import {
   Image,
   ScrollView,
 } from "react-native";
+import { translate } from "./multilanguage/languageService"; // Adjust the import path as necessary
+
 import { ProgressBar } from "@react-native-community/progress-bar-android";
 import * as Progress from "react-native-progress";
 import { useFocusEffect } from "@react-navigation/native";
@@ -486,13 +488,13 @@ const HomeScreen = () => {
             onPress={toggleRecording}
           >
             <Text style={styles.addButtonText}>
-              {recording ? "Stop Recording" : "Record"}
+              {recording ? translate("Stop Recording") : translate("Record")}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
-              styles.button,
+              styles.addButton,
               styles.playButton,
               selectedRecordingIndex === null && styles.disabledButton,
               isPlayingg && styles.redButton,
@@ -507,8 +509,8 @@ const HomeScreen = () => {
             }}
             disabled={selectedRecordingIndex === null}
           >
-            <Text style={styles.buttonText}>
-              {isPlayingg ? "Stop" : "Play"}
+            <Text style={styles.addButtonText}>
+              {isPlayingg ? translate("Stop") : translate("Play")}
             </Text>
           </TouchableOpacity>
 
@@ -517,7 +519,9 @@ const HomeScreen = () => {
             onPress={memorizeRecording}
             disabled={!recordingName}
           >
-            <Text style={[styles.addButtonText]}>Save Recording</Text>
+            <Text style={[styles.addButtonText]}>
+              {translate("Save Recording")}
+            </Text>
           </TouchableOpacity>
         </View>
         {
@@ -543,7 +547,7 @@ const HomeScreen = () => {
           />
         )}
         <View style={styles.delayContainer}>
-          <Text style={styles.label}>Replay delay:</Text>
+          <Text style={styles.label}>{translate("Replay delay")}:</Text>
           <TextInput
             style={styles.numberInput}
             value={repeatDelay}
@@ -564,7 +568,9 @@ const HomeScreen = () => {
                 }}
                 color={design.colors.buttonBackgroundColor}
               />
-              <Text style={styles.radioButtonLabel}>Minutes</Text>
+              <Text style={styles.radioButtonLabel}>
+                {translate("Minutes")}
+              </Text>
             </View>
             <View style={styles.radioContainer}>
               <RadioButton
@@ -577,7 +583,9 @@ const HomeScreen = () => {
                 }}
                 color={design.colors.buttonBackgroundColor}
               />
-              <Text style={styles.radioButtonLabel}>Seconds</Text>
+              <Text style={styles.radioButtonLabel}>
+                {translate("Seconds")}
+              </Text>
             </View>
           </View>
         </View>
@@ -586,7 +594,7 @@ const HomeScreen = () => {
           <View style={styles.recordingsListContainer}>
             <View style={styles.centeredContainer}>
               <Text style={[styles.addButtonText, { fontSize: 22 }]}>
-                Mantras:
+                {translate("Mantras")}:
               </Text>
             </View>
 
@@ -670,7 +678,7 @@ const HomeScreen = () => {
                 >
                   <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>
-                      Add your recording here...
+                      {translate("Add your recording here...")}
                     </Text>
                   </View>
                 </View>
@@ -789,7 +797,8 @@ const styles = StyleSheet.create({
     padding: 10,
     height: 50,
     borderRadius: 8,
-    marginLeft: 10,
+    marginLeft: 20,
+    marginRight: 20,
   },
   greenButton: {
     backgroundColor: "#00e500",
@@ -855,6 +864,9 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
+    width: windowWidth,
+    paddingRight: -50,
+    paddingLeft: -50,
     justifyContent: "space-around", // You can also use 'space-between' or 'space-evenly'
   },
 
@@ -872,7 +884,6 @@ const styles = StyleSheet.create({
   },
   playButton: {
     backgroundColor: "#00e500",
-    marginLeft: 10,
   },
   memorizeButton: {
     backgroundColor: "#ff00ff",
