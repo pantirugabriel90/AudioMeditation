@@ -47,6 +47,7 @@ const HomeScreen = () => {
   const [recordingsList, setRecordingsList] = useState([]);
   const [recordingName, setRecordingName] = useState("");
   const intervalIdRef = useRef(null); // Create useRef for interval ID
+  const interval = useRef(null); // Create useRef for interval ID
 
   const [progress, setProgress] = useState(0);
   const [progress2, setProgress2] = useState(0);
@@ -61,59 +62,32 @@ const HomeScreen = () => {
         : parseInt(repeatDelay) * 60;
 
     const startTime = Date.now();
-    return setInterval(() => {
+    if (interval.Current) clearInterval(interval.Current);
+    interval.Current = setInterval(() => {
+      if (!isPlayingg) {
+        clearInterval(interval.Current);
+        return;
+      }
       const elapsed = (Date.now() - startTime) / 1000;
       const pr = Math.min(elapsed / delayInSeconds, 1);
       setProgress(pr);
       setProgress2(pr);
-      console.log("update progress", pr);
+      // console.log("update progress", pr + isPlayingg);
       if (elapsed >= delayInSeconds) {
-        clearInterval(interval);
-        calculateProgress();
         setProgress(0);
+        calculateProgress();
       }
-    }, 100); // Adjust interval time to update more frequently
+    }, 1000); // Adjust interval time to update more frequently
   };
   useEffect(() => {
-    let interval;
-
     if (isPlayingg) {
-      interval = calculateProgress();
+      calculateProgress();
     } else {
       setProgress(0);
     }
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval.Current);
   }, [isPlayingg, repeatDelay, delayUnit]);
-  // useEffect(() => {
-  //   let interval;
-  //   const delayInSeconds =
-  //     delayUnit === "seconds"
-  //       ? parseInt(repeatDelay)
-  //       : parseInt(repeatDelay) * 60;
-
-  //   if (isPlayingg) {
-  //     const startTime = Date.now();
-  //     interval = setInterval(() => {
-  //       const elapsed = (Date.now() - startTime) / 1000;
-  //       var pr = Math.min(elapsed / delayInSeconds, 1);
-
-  //       setProgress(pr);
-  //       setProgress2(pr);
-  //       console.log("update progress" + progress + pr);
-  //       if (elapsed >= delayInSeconds) {
-  //         //   clearInterval(interval);
-  //         setProgress(0);
-  //       }
-  //     }, 2000);
-  //   } else {
-  //     //   setProgress(0);
-  //   }
-  //   return () => {
-  //     clearInterval(interval);
-  //     //  setProgress(0);
-  //   };
-  // }, [isPlayingg, repeatDelay, delayUnit]);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -147,25 +121,11 @@ const HomeScreen = () => {
   });
   useEffect(() => {
     const playAudio = async () => {
-      console.log("playAudio");
-      if (isPlayingg && sound) {
-        console.log("playAudio inside iffff");
-        try {
-          await sound.replayAsync();
-          const delayInSeconds =
-            delayUnit === "seconds"
-              ? parseInt(repeatDelay)
-              : parseInt(repeatDelay) * 60;
-
-          clearInterval(intervalIdRef.current);
-          intervalIdRef.current = setTimeout(() => {
-            playAudio();
-          }, delayInSeconds * 1000);
-        } catch (error) {
-          console.error("Error playing audio:", error);
-        }
-      } else if (isPlayingg && selectedRecordingIndex) {
+      console.log("playAudio1" + isPlayingg);
+      if (isPlayingg) {
         console.log("playAudio is Playing and selected Recording Index");
+
+        clearInterval(intervalIdRef.current);
         await togglePlay(selectedRecordingIndex);
       } else {
         console.log(
@@ -180,7 +140,7 @@ const HomeScreen = () => {
     };
     playAudio();
     return () => clearInterval(intervalIdRef.current);
-  }, [isPlayingg, sound]);
+  }, [isPlayingg]);
   const setupAudio = async () => {
     try {
       await Audio.setAudioModeAsync({
@@ -238,7 +198,6 @@ const HomeScreen = () => {
     }
     try {
       await stopSound();
-      if (sound) await sound.stopAsync();
       if (recording) {
         await recording.stopAndUnloadAsync();
         const { sound } = await recording.createNewLoadedSoundAsync(
@@ -337,7 +296,7 @@ const HomeScreen = () => {
         //await togglePlay(recordIndex, again);
         await sound.replayAsync();
       } else {
-        if (sound) await sound.replayAsync();
+        //  if (sound) await sound.replayAsync();
       }
       //   }
     } catch (error) {
