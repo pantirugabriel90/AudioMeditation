@@ -520,16 +520,19 @@ const HomeScreen = () => {
             <Text style={[styles.addButtonText]}>Save Recording</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.progressBarContainer}>
-          <Progress.Bar
-            progress={progress}
-            width={300}
-            height={20}
-            color="#66FF66"
-            borderWidth={2}
-            borderColor="#000" // Outline color
-          />
-        </View>
+        {
+          <View style={styles.progressBarContainer}>
+            <Progress.Bar
+              progress={progress}
+              width={300}
+              height={20}
+              color="#00e500"
+              borderWidth={2}
+              borderColor={design.colors.purple08} // Outline color
+              unfilledColor={design.colors.purple08} // The background color of the unfilled portion
+            />
+          </View>
+        }
         {recordingToBeSaved && (
           <TextInput
             style={styles.input}
@@ -630,13 +633,13 @@ const HomeScreen = () => {
                             styles.selectedRecording,
                         ]}
                       >
-                        {!isPlayingg ? (
-                          <Icon name="play-box" style={styles.playIcon} />
-                        ) : (
+                        {isPlayingg && selectedRecordingIndex === index ? (
                           <Icon
                             name="stop-circle-outline"
                             style={styles.stopIcon}
                           />
+                        ) : (
+                          <Icon name="play-box" style={styles.playIcon} />
                         )}
                         <Text style={styles.recordingItem}>
                           {recording.name}
