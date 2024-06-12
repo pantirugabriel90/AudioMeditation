@@ -210,6 +210,12 @@ const Repeat = () => {
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
+      <TextInput
+        style={styles.textInput}
+        value={inputText}
+        onChangeText={(text) => setInputText(text)}
+        placeholder={translate("enterText")}
+      />
       {
         <View style={styles.progressBarContainer}>
           <Progress.Bar
@@ -223,12 +229,6 @@ const Repeat = () => {
           />
         </View>
       }
-      <TextInput
-        style={styles.textInput}
-        value={inputText}
-        onChangeText={(text) => setInputText(text)}
-        placeholder={translate("enterText")}
-      />
       <View style={styles.inputContainer}>
         <Text style={styles.label}>{translate("delayInSeconds")}</Text>
         <View style={styles.inputWrapper}>
@@ -293,6 +293,8 @@ const Repeat = () => {
 
 const styles = StyleSheet.create({
   progressBarContainer: {
+    justifyContent: "center",
+    alignItems: "center",
     width: "80%",
   },
   addButton: {
