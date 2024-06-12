@@ -15,5 +15,7 @@
   "delayInSeconds": "Delay in seconds:",
   "speechRate": "Speech Rate:",
   "stopSpeaking": "Stop Speaking",
-  "textToSpeech": "Text to Speech"
+  "textToSpeech": "Text to Speech",
+  "home": "Home",
+  "repeat": "Repeat"
 }

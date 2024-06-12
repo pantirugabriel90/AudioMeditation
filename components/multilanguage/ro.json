@@ -14,5 +14,7 @@
   "delayInSeconds": "Întârziere în secunde:",
   "speechRate": "Rata de vorbire:",
   "stopSpeaking": "Opriți vorbirea",
-  "textToSpeech": "Text în vorbire"
+  "textToSpeech": "Text în vorbire",
+  "home": "Acasă",
+  "repeat": "Repetă"
 }
