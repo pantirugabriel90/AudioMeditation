@@ -36,6 +36,7 @@ const Repeat = () => {
   const interval = useRef(null); // Create useRef for interval ID
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
+  const mantras = ["mantra1", "mantra2", "mantra3", "mantra4", "mantra5"];
   const calculateProgress = () => {
     const delayInSeconds = parseInt(delayRepeat);
 
@@ -195,6 +196,9 @@ const Repeat = () => {
       prevColor === "#ff9900" ? "#00ff00" : "#ff9900"
     );
   };
+  const handleMantraClick = (mantra) => {
+    setInputText(mantra);
+  };
   const saveDelay = async (delay) => {
     try {
       if (!/^\d*\.?\d*$/.test(delay)) return;
@@ -210,6 +214,18 @@ const Repeat = () => {
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
+      <View style={styles.mantraContainer}>
+        {mantras.map((mantra, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.mantraButton}
+            onPress={() => handleMantraClick(translate(mantra))}
+          >
+            <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
+            <Text style={styles.mantraText}>{translate(mantra)}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <TextInput
         style={styles.textInput}
         value={inputText}
@@ -292,6 +308,31 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  mantraContainer: {
+    backgroundColor: design.colors.purple08,
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: -20,
+  },
+  mantraButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    marginVertical: 3,
+    borderRadius: 5,
+  },
+  mantraText: {
+    color: "white",
+    fontSize: 15,
+    textAlign: "center",
+    textDecorationLine: "underline", // This makes the text underlined
+  },
+  arrowIcon: {
+    fontSize: 24,
+    color: "rgba(0, 229, 0, 0.8)",
+    marginRight: 10,
+  },
   progressBarContainer: {
     justifyContent: "center",
     alignItems: "center",
