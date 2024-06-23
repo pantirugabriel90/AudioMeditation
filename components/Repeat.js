@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: "10%",
     color: "purple",
-    marginBottom: 30,
+    marginBottom: 15,
     borderRadius: 15,
     textAlign: "center",
     backgroundColor: "white",

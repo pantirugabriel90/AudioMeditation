@@ -247,7 +247,7 @@ const HomeScreen = () => {
 
       shouldPlay = true;
       if (typeof recordIndex === "number") {
-        //  await requestWakeLock();
+        await requestWakeLock();
         console.log("recordIndex  " + JSON.stringify(recordIndex));
         const selectedRecording = recordingsList[recordIndex];
         console.log(
@@ -363,6 +363,11 @@ const HomeScreen = () => {
   const saveDelay = async (delay, unit) => {
     try {
       if (!/^\d*\.?\d*$/.test(delay)) return;
+      var turnBackOn = false;
+      if (isPlayingg) {
+        turnBackOn = true;
+        setIsPlayingg(false);
+      }
       setRepeatDelay(delay);
       var savedUnit =
         unit === "minutes" || unit === "seconds" ? unit : delayUnit;
@@ -371,6 +376,7 @@ const HomeScreen = () => {
       console.log("delay" + delaySettings);
 
       if (delay) await AsyncStorage.setItem("delaySettings", delaySettings);
+      if (turnBackOn) setIsPlayingg(true);
     } catch (error) {
       console.error("Error saving delay settings:", error);
     }
