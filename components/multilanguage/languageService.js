@@ -21,7 +21,7 @@ export async function initLocalization() {
   return currentLanguage;
 }
 
-let currentLanguage = "en";
+let currentLanguage = "ro";
 
 export function setLanguage(language) {
   currentLanguage = language;

@@ -23,7 +23,7 @@ web-build/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
-
+gradle-8-8-all.zip
 # macOS
 .DS_Store
 *.pem

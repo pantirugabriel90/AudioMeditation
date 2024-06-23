@@ -14,7 +14,9 @@
     "ios": {
       "buildNumber": "1",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {
@@ -23,7 +25,9 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pantirugabriel90.MeditativeEcho",
-      "permissions": ["WAKE_LOCK"]
+      "permissions": [
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +36,10 @@
       "eas": {
         "projectId": "75d2babc-e34d-4e5e-afbc-685457e0f295"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/75d2babc-e34d-4e5e-afbc-685457e0f295"
     }
   }
 }

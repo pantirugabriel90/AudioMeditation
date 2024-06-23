@@ -1,7 +1,7 @@
 eas build -p android
  jar file is in downloads!
 
-java -jar "./bundletool-all-1.16.0.jar" build-apks --mode=universal --bundle=den.aab --output=den.apks --ks="creds.jks" --ks-pass=pass:1f0f4af142bbd7e1a9dea5383b6e38b2 --ks-key-alias=b0bf9dea28188caa14f730d7220e3edc --key-pass=pass:905ec62ee954052536a8880a4a32d5c7
+java -jar "./bundletool-all-1.16.0.jar" build-apks --mode=universal --bundle=s.aab --output=s.apks --ks="creds.jks" --ks-pass=pass:1f0f4af142bbd7e1a9dea5383b6e38b2 --ks-key-alias=b0bf9dea28188caa14f730d7220e3edc --key-pass=pass:905ec62ee954052536a8880a4a32d5c7
 
 
 
@@ -17,8 +17,11 @@ java -jar "./bundletool-all-1.16.0.jar" build-apks --mode=universal --bundle=den
 
 
 
+adb logcat | findstr com.pantirugabriel90.MeditativeEcho
 
 java -jar "./bundletool-all-1.15.6.jar" build-apks --bundle=asdsadsa.aab --output=my_app.apks
 java -jar "./bundletool-all-1.15.4.jar" install-apks --apks=myapp2.apks
 java -jar "./bundletool-all-1.15.4.jar" build-apks --bundle=ora17.aab --output=ora17.apks --ks="cred.jks" --ks-pass=pass:1f0f4af142bbd7e1a9dea5383b6e38b2 --ks-key-alias=b0bf9dea28188caa14f730d7220e3edc --key-pass=pass:905ec62ee954052536a8880a4a32d5c7
+
+
 
