@@ -10,6 +10,7 @@
   "Seconds": "Secunde",
   "Mantras": "Mantre",
   "Add your recording here...": "Adăugați înregistrarea aici...",
+  "localLanguageWarning": "Limba locală nu este suportată, pentru text-to-speech, vă rugăm să utilizați limba engleză.",
   "enterText": "Introduceți textul aici",
   "delayInSeconds": "Întârziere în secunde:",
   "speechRate": "Rata de vorbire:",

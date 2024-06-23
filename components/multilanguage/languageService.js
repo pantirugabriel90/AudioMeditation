@@ -27,6 +27,12 @@ export function setLanguage(language) {
   currentLanguage = language;
   return currentLanguage;
 }
+export async function getLocalLanguage() {
+  return currentLanguage;
+  await Localization.getLocalizationAsync(); // Wait for localization to initialize
+  var localValue = Localization.locale; // Extract the language code
+  return localValue;
+}
 
 export function translate(key) {
   if (key === "weightValidationError")
@@ -35,4 +41,10 @@ export function translate(key) {
   var returnValue = translations[currentLanguage][key] || key;
 
   return returnValue;
+}
+export function translateToLanguage(key, forcedLanguage) {
+  if (key === "weightValidationError")
+    console.log("current langualge " + currentLanguage);
+
+  return translations[forcedLanguage][key] || key;
 }

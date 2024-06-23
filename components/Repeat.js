@@ -14,7 +14,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as KeepAwake from "expo-keep-awake";
 import { Audio } from "expo-av";
 import * as Progress from "react-native-progress";
-import { translate } from "./multilanguage/languageService"; // Adjust the import path as necessary
+import {
+  translate,
+  getLocalLanguage,
+  translateToLanguage,
+} from "./multilanguage/languageService"; // Adjust the import path as necessary
 import {
   saveSelectedImage,
   loadSelectedImage,
@@ -32,13 +36,15 @@ const Repeat = () => {
 
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [inputText, setInputText] = useState("");
+
+  const [localLanguageSupported, setLocalLanguageSupported] = useState(true);
   const [tempSpeechRate, setTempSpeechRate] = useState("1.0");
   const [spokenText, setSpokenText] = useState("");
   const [progress, setProgress] = useState(0);
   const interval = useRef(null); // Create useRef for interval ID
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
-  const mantras = ["mantra1", "mantra2", "mantra3", "mantra4", "mantra5"];
+  const mantras = ["mantra1", "mantra2", "mantra4", "mantra5"];
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -104,7 +110,32 @@ const Repeat = () => {
         console.log("Error loading data from AsyncStorage:", error);
       }
     };
+    const getAvailableLanguages = async () => {
+      try {
+        await Localization.getLocalizationAsync(); // Wait for localization to initialize
+        const availableOptions = await Speech.getAvailableVoicesAsync();
 
+        if (Array.isArray(availableOptions)) {
+          const localLanguage = await getLocalLanguage();
+          console.log(availableOptions);
+          console.log(localLanguage);
+          const languageSupported = availableOptions.some((voice) =>
+            voice.language.startsWith(localLanguage)
+          );
+
+          setLocalLanguageSupported(languageSupported);
+
+          console.log("ce masa " + languageSupported);
+        } else {
+          console.log("local language reading error.");
+
+          setLocalLanguageSupported(false);
+        }
+      } catch (error) {
+        console.log("Exception local language reading error.");
+      }
+    };
+    getAvailableLanguages();
     loadValues();
   }, []);
   useEffect(() => {
@@ -185,9 +216,11 @@ const Repeat = () => {
   const speakInLoop = async () => {
     console.log("isSpeaking" + isSpeaking);
     if (isSpeaking) {
+      var localLanguage = await getLocalLanguage();
       await setupAudio(); // Ensure audio is set up for background playback
       await Speech.speak(spokenText, {
         rate: speechRate,
+        language: localLanguage,
         onDone: () => {
           // onDone callback can be used for additional logic after speech finishes, but not for stopping currently
         },
@@ -230,6 +263,10 @@ const Repeat = () => {
       console.error("Error saving delay settings:", error);
     }
   };
+  const conditionalTranslate = (text) => {
+    if (localLanguageSupported) return translate(text);
+    return translateToLanguage(text, "en");
+  };
   return (
     <ImageBackground
       source={design.backgroundImage}
@@ -237,17 +274,26 @@ const Repeat = () => {
       resizeMode="cover"
     >
       {!isKeyboardVisible && (
-        <View style={styles.mantraContainer}>
-          {mantras.map((mantra, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.mantraButton}
-              onPress={() => handleMantraClick(translate(mantra))}
-            >
-              <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
-              <Text style={styles.mantraText}>{translate(mantra)}</Text>
-            </TouchableOpacity>
-          ))}
+        <View>
+          <View style={styles.mantraContainer}>
+            {mantras.map((mantra, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.mantraButton}
+                onPress={() => handleMantraClick(conditionalTranslate(mantra))}
+              >
+                <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
+                <Text style={styles.mantraText}>
+                  {conditionalTranslate(mantra)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {!localLanguageSupported && (
+            <Text style={styles.warningText}>
+              {translate("localLanguageWarning")}
+            </Text>
+          )}
         </View>
       )}
       <TextInput
@@ -339,6 +385,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginBottom: -20,
+  },
+  warningText: {
+    color: "red",
+    fontSize: 14,
+    backgroundColor: design.colors.purple08,
+    borderRadius: 10,
+    marginTop: 25,
+    marginBottom: -15,
+    textAlign: "center",
   },
   mantraButton: {
     paddingVertical: 2,
