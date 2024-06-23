@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Keyboard,
   TextInput,
   StyleSheet,
   ImageBackground,
@@ -29,6 +30,7 @@ const Repeat = () => {
     require("../assets/medit.jpg")
   );
 
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [inputText, setInputText] = useState("");
   const [tempSpeechRate, setTempSpeechRate] = useState("1.0");
   const [spokenText, setSpokenText] = useState("");
@@ -37,6 +39,26 @@ const Repeat = () => {
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
   const mantras = ["mantra1", "mantra2", "mantra3", "mantra4", "mantra5"];
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
   const calculateProgress = () => {
     const delayInSeconds = parseInt(delayRepeat);
 
@@ -214,18 +236,20 @@ const Repeat = () => {
       style={[styles.background, { backgroundColor }]}
       resizeMode="cover"
     >
-      <View style={styles.mantraContainer}>
-        {mantras.map((mantra, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.mantraButton}
-            onPress={() => handleMantraClick(translate(mantra))}
-          >
-            <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
-            <Text style={styles.mantraText}>{translate(mantra)}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.mantraContainer}>
+          {mantras.map((mantra, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.mantraButton}
+              onPress={() => handleMantraClick(translate(mantra))}
+            >
+              <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
+              <Text style={styles.mantraText}>{translate(mantra)}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       <TextInput
         style={styles.textInput}
         value={inputText}
