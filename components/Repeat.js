@@ -229,6 +229,7 @@ const Repeat = () => {
       <TextInput
         style={styles.textInput}
         value={inputText}
+        multiline
         onChangeText={(text) => setInputText(text)}
         placeholder={translate("enterText")}
       />
@@ -316,7 +317,7 @@ const styles = StyleSheet.create({
     marginBottom: -20,
   },
   mantraButton: {
-    paddingVertical: 5,
+    paddingVertical: 2,
     paddingHorizontal: 10,
     flexDirection: "row",
     marginVertical: 3,
@@ -363,6 +364,7 @@ const styles = StyleSheet.create({
     width: "80%",
     textAlign: "right",
     marginRight: 10,
+    marginBottom: -10,
     color: "white",
     fontWeight: "bold",
   },
@@ -419,13 +421,12 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderWidth: 1,
     marginTop: 10,
-    marginBottom: 10,
     borderRadius: 15,
     textAlign: "center",
     backgroundColor: "white",
   },
   textInput: {
-    width: "70%",
+    width: "80%",
     height: "25%",
     borderColor: "white",
     borderWidth: 1,

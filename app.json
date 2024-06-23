@@ -4,7 +4,7 @@
     "slug": "MeditativeEcho",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/redParrot.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -14,20 +14,16 @@
     "ios": {
       "buildNumber": "1",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
+        "UIBackgroundModes": ["audio"]
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/redParrot.png",
+        "backgroundColor": "#0328fc"
       },
       "package": "com.pantirugabriel90.MeditativeEcho",
-      "permissions": [
-        "WAKE_LOCK"
-      ]
+      "permissions": ["WAKE_LOCK"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
