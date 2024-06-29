@@ -4,6 +4,7 @@ import HomeScreen from "./components/Home";
 import Repeat from "./components/Repeat"; // Corrected import statement
 import { Ionicons } from "@expo/vector-icons";
 import Settings from "./components/Settings";
+import Background from "./components/Background";
 import { View, Text, StyleSheet, Button, StatusBar } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
@@ -108,7 +109,22 @@ const App = () => {
             tabBarLabel: translate("repeat"),
           }}
         />
-
+        <Tab.Screen
+          name="Background"
+          component={Background}
+          options={{
+            headerTitleStyle: {
+              color: design.colors.headerTitleColor,
+            },
+            headerStyle: {
+              backgroundColor: design.colors.purple08,
+            },
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="settings" size={24} color={color} />
+            ),
+            tabBarLabel: "Background",
+          }}
+        />
         {/* <Tab.Screen
           name="Settings"
           component={Settings}

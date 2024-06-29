@@ -35,6 +35,8 @@ import {
 import * as design from "./common/styles";
 import * as KeepAwake from "expo-keep-awake";
 
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
 const windowWidth = Dimensions.get("window").width; // Get screen width
 
 const HomeScreen = () => {
@@ -56,6 +58,28 @@ const HomeScreen = () => {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/medit.jpg")
   );
+
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [startTime, setStartTime] = useState(null);
+  const [intervalIdTimer, setIntervalIdTimer] = useState(null);
+
+  useEffect(() => {
+    if (recording) {
+      const id = setInterval(() => {
+        setElapsedTime(Date.now() - startTime);
+      }, 1000);
+      setIntervalIdTimer(id);
+    } else if (!recording && intervalIdTimer) {
+      clearInterval(intervalIdTimer);
+      setIntervalIdTimer(null);
+    }
+
+    return () => {
+      if (intervalIdTimer) {
+        clearInterval(intervalIdTimer);
+      }
+    };
+  }, [recording, startTime]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const calculateProgress = () => {
     const delayInSeconds =
@@ -74,7 +98,7 @@ const HomeScreen = () => {
       const pr = Math.min(elapsed / delayInSeconds, 1);
       setProgress(pr);
       setProgress2(pr);
-      // console.log("update progress", pr + isPlayingg);
+      // console.log("update progress", pr + isPlayingg);np
       if (elapsed >= delayInSeconds) {
         setProgress(0);
         calculateProgress();
@@ -179,6 +203,18 @@ const HomeScreen = () => {
       console.error("Error releasing wake lock:", err);
     }
   };
+  const formatTime = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(seconds).padStart(2, "0")}`;
+  };
+
   const toggleRecording = async () => {
     try {
       setRecordingToBeSaved(true);
@@ -201,6 +237,8 @@ const HomeScreen = () => {
     try {
       await stopSound();
       if (recording) {
+        //stop recording
+
         await recording.stopAndUnloadAsync();
         const { sound } = await recording.createNewLoadedSoundAsync(
           {},
@@ -220,6 +258,9 @@ const HomeScreen = () => {
         setTemporary(recording);
         setRecording(null);
       } else {
+        //start recording
+
+        setStartTime(Date.now());
         const recordingObj = new Audio.Recording();
         await recordingObj.prepareToRecordAsync(
           Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
@@ -342,6 +383,8 @@ const HomeScreen = () => {
 
         setRecordingName("");
 
+        setElapsedTime(0);
+        setStartTime(null);
         setRecordingToBeSaved(false);
       } else {
         console.log("recording is null");
@@ -484,6 +527,11 @@ const HomeScreen = () => {
       resizeMode="cover"
     >
       <View style={styles.container}>
+        {recordingToBeSaved && (
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
+          </View>
+        )}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[
@@ -698,6 +746,10 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  timerContainer: { marginTop: -25 },
+  timerText: {
+    fontWeight: "bold",
+  },
   progressBarContainer: {
     width: "80%",
   },
