@@ -63,6 +63,8 @@ const HomeScreen = () => {
   const [startTime, setStartTime] = useState(null);
   const [intervalIdTimer, setIntervalIdTimer] = useState(null);
 
+  const [progressTime, setProgressTime] = useState("0:00");
+  const [totalTime, setTotalTime] = useState("0:00");
   useEffect(() => {
     if (recording) {
       const id = setInterval(() => {
@@ -209,10 +211,10 @@ const HomeScreen = () => {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
       2,
       "0"
-    )}:${String(seconds).padStart(2, "0")}`;
+    )}`;
   };
 
   const toggleRecording = async () => {
@@ -280,6 +282,22 @@ const HomeScreen = () => {
       await stopSound();
     }
   };
+
+  const setTotalTimeWithDelay = (selectedRecording, repeatDelay, delayUnit) => {
+    const delayInSeconds =
+      delayUnit === "seconds"
+        ? parseInt(repeatDelay)
+        : parseInt(repeatDelay) * 60;
+    const delayInMilliseconds = delayInSeconds * 1000;
+    console.log("delayInSeconds " + delayInSeconds);
+    // Add delay to the elapsed time
+    const totalElapsedTime =
+      selectedRecording.elapsedTime + delayInMilliseconds;
+    const formattedElapsedTime = formatTime(totalElapsedTime);
+
+    setTotalTime(formattedElapsedTime);
+  };
+
   const togglePlay = async (recordIndex, stop) => {
     try {
       var shouldPlay = isPlayingg;
@@ -300,6 +318,7 @@ const HomeScreen = () => {
             recordIndex
         );
 
+        setTotalTimeWithDelay(selectedRecording, repeatDelay, delayUnit);
         var first = true;
         const { sound } = await Audio.Sound.createAsync(
           { uri: selectedRecording.fileUri },
@@ -372,7 +391,7 @@ const HomeScreen = () => {
 
         const fileUri = `${FileSystem.documentDirectory}${recordingName}.wav`;
         await FileSystem.moveAsync({ from: uri, to: fileUri });
-        const recordingObject = { name: recordingName, fileUri };
+        const recordingObject = { name: recordingName, fileUri, elapsedTime };
 
         setRecordingsList((prevList) => [...prevList, recordingObject]);
 
@@ -418,7 +437,24 @@ const HomeScreen = () => {
 
       console.log("delay" + delaySettings);
 
-      if (delay) await AsyncStorage.setItem("delaySettings", delaySettings);
+      if (delay) {
+        await AsyncStorage.setItem("delaySettings", delaySettings);
+        console.log(
+          "if cond " +
+            selectedRecordingIndex +
+            (typeof selectedRecordingIndex === "number" &&
+              recordingsList[selectedRecordingIndex])
+        );
+        if (
+          typeof selectedRecordingIndex === "number" &&
+          recordingsList[selectedRecordingIndex]
+        )
+          setTotalTimeWithDelay(
+            recordingsList[selectedRecordingIndex],
+            delay,
+            unit
+          );
+      }
       if (turnBackOn) setIsPlayingg(true);
     } catch (error) {
       console.error("Error saving delay settings:", error);
@@ -582,13 +618,16 @@ const HomeScreen = () => {
           <View style={styles.progressBarContainer}>
             <Progress.Bar
               progress={progress}
-              width={300}
+              width={250}
               height={20}
               color="#00e500"
               borderWidth={2}
               borderColor={design.colors.purple08} // Outline color
               unfilledColor={design.colors.purple08} // The background color of the unfilled portion
             />
+            <Text
+              style={styles.progressTmerText}
+            >{`${progressTime} / ${totalTime}`}</Text>
           </View>
         }
         {recordingToBeSaved && (
@@ -750,8 +789,14 @@ const styles = StyleSheet.create({
   timerText: {
     fontWeight: "bold",
   },
+  progressTmerText: {
+    fontWeight: "bold",
+    marginLeft: 15,
+    marginTop: 1,
+  },
   progressBarContainer: {
     width: "80%",
+    flexDirection: "row",
   },
   centeredContainer: {
     alignItems: "center",
