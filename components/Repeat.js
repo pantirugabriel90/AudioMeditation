@@ -45,8 +45,12 @@ const Repeat = () => {
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
 
-  const mantras = ["mantra1", "mantra2", "mantra4", "mantra5"];
-  const [loadedMantras, setLoadedMantras] = useState([]);
+  const [mantras, setMantras] = useState([
+    "mantra1",
+    "mantra2",
+    "mantra4",
+    "mantra5",
+  ]);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -100,13 +104,15 @@ const Repeat = () => {
     const loadValues = async () => {
       try {
         const savedText = await AsyncStorage.getItem("inputText");
-        const savedMantras = await AsyncStorage.getItem("savedMantras");
+        const savedMantrasString = await AsyncStorage.getItem("mantras");
         const savedDelay = await AsyncStorage.getItem("delayRepeat");
         const savedRate = await AsyncStorage.getItem("speechRate");
         console.log("loading  speech rate majestically: " + savedRate);
-
+        const savedMantras = savedMantrasString
+          ? JSON.parse(savedMantrasString)
+          : null;
         setInputText(savedText || "");
-        setLoadedMantras(savedMantras || []);
+        setMantras(savedMantras || mantras);
         setDelayRepeat(parseFloat(savedDelay) || 5);
         setSpeechRate(parseFloat(savedRate) || 1.0);
         setTempSpeechRate(parseFloat(savedRate) || 1.0);
@@ -146,6 +152,9 @@ const Repeat = () => {
     const saveValues = async () => {
       try {
         await AsyncStorage.setItem("inputText", inputText);
+
+        const mantrasString = JSON.stringify(mantras);
+        await AsyncStorage.setItem("mantras", mantrasString);
         await AsyncStorage.setItem("delayRepeat", delayRepeat.toString());
         await AsyncStorage.setItem("speechRate", speechRate.toString());
       } catch (error) {
@@ -154,7 +163,7 @@ const Repeat = () => {
     };
 
     saveValues();
-  }, [inputText, delayRepeat, speechRate]);
+  }, [inputText, delayRepeat, speechRate, mantras]);
   useFocusEffect(() => {
     loadSelectedImage().then((storedImage) => {
       if (storedImage !== null) {
@@ -271,18 +280,27 @@ const Repeat = () => {
     if (localLanguageSupported) return translate(text);
     return translateToLanguage(text, "en");
   };
-
+  const handleSave = async () => {
+    const updatedMantras = [...mantras];
+    updatedMantras.push(inputText);
+    setMantras(updatedMantras);
+  };
   const handleClearTextBox = async () => {
     setInputText("");
   };
   const handleDeleteMantra = async (index) => {
-    const updatedRecordings = [...recordingsList];
-    updatedRecordings.splice(index, 1);
-    setRecordingsList(updatedRecordings);
-    setSelectedRecordingIndex(null);
+    const updatedMantras = [...mantras];
+    updatedMantras.splice(index, 1);
+    setMantras(updatedMantras);
 
-    const updatedRecordsString = JSON.stringify(updatedRecordings);
-    await AsyncStorage.setItem("memorizedRecords", updatedRecordsString);
+    // const updatedMantrasString = JSON.stringify(updatedMantras);
+    // await AsyncStorage.setItem("savedMantras", updatedMantrasString);
+  };
+  const truncateText = (text, maxLength) => {
+    if (text && text.length > maxLength) {
+      return text.slice(0, maxLength) + "..."; // Add '...' to indicate truncation
+    }
+    return text;
   };
 
   return (
@@ -302,8 +320,15 @@ const Repeat = () => {
               >
                 <Icon name="arrow-bottom-right" style={styles.arrowIcon} />
                 <Text style={styles.mantraText}>
-                  {conditionalTranslate(mantra)}
+                  {truncateText(conditionalTranslate(mantra), 35)}
                 </Text>
+
+                <TouchableOpacity
+                  style={styles.deleteMantraContainer}
+                  onPress={() => handleDeleteMantra(index)}
+                >
+                  <Icon name="delete-forever" style={styles.deleteIcon} />
+                </TouchableOpacity>
               </TouchableOpacity>
             ))}
           </View>
@@ -322,14 +347,22 @@ const Repeat = () => {
           onChangeText={(text) => setInputText(text)}
           placeholder="Enter text"
         />
-        <TouchableOpacity
-          style={styles.subContainer}
-          onPress={() => handleClearTextBox()}
-        >
-          <Icon name="delete-forever" style={styles.deleteIcon} />
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={styles.subContainer}
+            onPress={() => handleClearTextBox()}
+          >
+            <Icon name="delete-forever" style={styles.deleteIcon} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.subContainer}
+            onPress={() => handleSave()}
+          >
+            <Icon name="plus" style={styles.addIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
-      {
+      {!isKeyboardVisible && (
         <View style={styles.progressBarContainer}>
           <Progress.Bar
             progress={progress}
@@ -341,7 +374,7 @@ const Repeat = () => {
             unfilledColor={design.colors.purple08} // The background color of the unfilled portion
           />
         </View>
-      }
+      )}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>{translate("delayInSeconds")}</Text>
         <View style={styles.inputWrapper}>
@@ -405,6 +438,15 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  buttonsContainer: {
+    flexDirection: "column", // Stack buttons vertically
+    alignItems: "center", // Center buttons horizontally within the container
+    marginTop: 20,
+  },
+  addIcon: {
+    fontSize: 24,
+    color: "green", // Adjust color as needed
+  },
   textInput: {
     width: "80%",
     borderColor: "white",
@@ -436,6 +478,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: 40,
+    marginLeft: 10,
+  },
+  deleteMantraContainer: {
+    backgroundColor: "white",
+    borderRadius: 7,
+    padding: 1,
+    marginTop: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 30,
     marginLeft: 10,
   },
   mantraContainer: {
@@ -471,6 +523,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "rgba(0, 229, 0, 0.8)",
     marginRight: 10,
+    marginLeft: -10,
   },
   progressBarContainer: {
     justifyContent: "center",
