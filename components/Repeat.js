@@ -44,7 +44,9 @@ const Repeat = () => {
   const interval = useRef(null); // Create useRef for interval ID
   const [delayRepeat, setDelayRepeat] = useState(5);
   const [speechRate, setSpeechRate] = useState(1.0);
+
   const mantras = ["mantra1", "mantra2", "mantra4", "mantra5"];
+  const [loadedMantras, setLoadedMantras] = useState([]);
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -98,11 +100,13 @@ const Repeat = () => {
     const loadValues = async () => {
       try {
         const savedText = await AsyncStorage.getItem("inputText");
+        const savedMantras = await AsyncStorage.getItem("savedMantras");
         const savedDelay = await AsyncStorage.getItem("delayRepeat");
         const savedRate = await AsyncStorage.getItem("speechRate");
         console.log("loading  speech rate majestically: " + savedRate);
 
         setInputText(savedText || "");
+        setLoadedMantras(savedMantras || []);
         setDelayRepeat(parseFloat(savedDelay) || 5);
         setSpeechRate(parseFloat(savedRate) || 1.0);
         setTempSpeechRate(parseFloat(savedRate) || 1.0);
@@ -267,6 +271,20 @@ const Repeat = () => {
     if (localLanguageSupported) return translate(text);
     return translateToLanguage(text, "en");
   };
+
+  const handleClearTextBox = async () => {
+    setInputText("");
+  };
+  const handleDeleteMantra = async (index) => {
+    const updatedRecordings = [...recordingsList];
+    updatedRecordings.splice(index, 1);
+    setRecordingsList(updatedRecordings);
+    setSelectedRecordingIndex(null);
+
+    const updatedRecordsString = JSON.stringify(updatedRecordings);
+    await AsyncStorage.setItem("memorizedRecords", updatedRecordsString);
+  };
+
   return (
     <ImageBackground
       source={design.backgroundImage}
@@ -296,13 +314,21 @@ const Repeat = () => {
           )}
         </View>
       )}
-      <TextInput
-        style={styles.textInput}
-        value={inputText}
-        multiline
-        onChangeText={(text) => setInputText(text)}
-        placeholder={translate("enterText")}
-      />
+      <View style={styles.textBoxContainer}>
+        <TextInput
+          style={styles.textInput}
+          value={inputText}
+          multiline
+          onChangeText={(text) => setInputText(text)}
+          placeholder="Enter text"
+        />
+        <TouchableOpacity
+          style={styles.subContainer}
+          onPress={() => handleClearTextBox()}
+        >
+          <Icon name="delete-forever" style={styles.deleteIcon} />
+        </TouchableOpacity>
+      </View>
       {
         <View style={styles.progressBarContainer}>
           <Progress.Bar
@@ -379,6 +405,39 @@ const Repeat = () => {
 };
 
 const styles = StyleSheet.create({
+  textInput: {
+    width: "80%",
+    borderColor: "white",
+    borderWidth: 1,
+    marginTop: "10%",
+    color: "purple",
+    marginBottom: 15,
+    height: "60%",
+    borderRadius: 15,
+    textAlign: "center",
+    backgroundColor: "white",
+  },
+  textBoxContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    height: "25%",
+    alignItems: "center",
+    width: "100%",
+  },
+  deleteIcon: {
+    fontSize: 20,
+    color: "red",
+  },
+  subContainer: {
+    backgroundColor: "white",
+    borderRadius: 7,
+    padding: 8,
+    marginTop: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 40,
+    marginLeft: 10,
+  },
   mantraContainer: {
     backgroundColor: design.colors.purple08,
     padding: 10,
@@ -500,18 +559,6 @@ const styles = StyleSheet.create({
     borderColor: "white",
     borderWidth: 1,
     marginTop: 10,
-    borderRadius: 15,
-    textAlign: "center",
-    backgroundColor: "white",
-  },
-  textInput: {
-    width: "80%",
-    height: "25%",
-    borderColor: "white",
-    borderWidth: 1,
-    marginTop: "10%",
-    color: "purple",
-    marginBottom: 15,
     borderRadius: 15,
     textAlign: "center",
     backgroundColor: "white",

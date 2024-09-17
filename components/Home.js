@@ -855,6 +855,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "pink",
   },
+  deleteIcon: {
+    fontSize: 20,
+    color: "red",
+  },
   subContainer: {
     backgroundColor: "white",
     borderRadius: 7,
@@ -870,10 +874,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderRadius: 10,
     width: windowWidth * 0.75,
-  },
-  deleteIcon: {
-    fontSize: 20,
-    color: "red",
   },
   playIcon: {
     fontSize: 24,
