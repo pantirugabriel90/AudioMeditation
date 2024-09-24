@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, Button, StatusBar } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   initLocalization,
+  setLanguage,
   translate,
 } from "./components/multilanguage/languageService"; // Adjust the import path as necessary
 
@@ -27,7 +28,19 @@ const App = () => {
       // You can also send the error to your logging service here
     }
   }, [error]);
-
+  useEffect(() => {
+    setupLocalization();
+  }, []);
+  const setupLocalization = async () => {
+    try {
+      console.log("Initializing Localization...");
+      const language = await initLocalization(); // Awaiting the async call
+      console.log("Localization initialized, current language:", language);
+      setLanguage(language); // Set the language after successful initialization
+    } catch (error) {
+      console.error("Error initializing localization:", error);
+    }
+  };
   // Error boundary component
   class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -109,7 +122,7 @@ const App = () => {
             tabBarLabel: translate("repeat"),
           }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Background"
           component={Background}
           options={{
@@ -124,7 +137,7 @@ const App = () => {
             ),
             tabBarLabel: "Background",
           }}
-        />
+        /> */}
         {/* <Tab.Screen
           name="Settings"
           component={Settings}
