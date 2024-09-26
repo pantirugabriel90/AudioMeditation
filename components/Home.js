@@ -20,6 +20,7 @@ import * as Progress from "react-native-progress";
 import { useFocusEffect } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import { PermissionsAndroid } from "react-native";
+import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import commonStyles from "./CommonStyles";
@@ -220,21 +221,18 @@ const HomeScreen = () => {
   const toggleRecording = async () => {
     try {
       setRecordingToBeSaved(true);
-      // alert("bfore calling requestPermissions");
-      //await requestMicrophonePermissions();  try {
-      console.log("Requesting permissions..");
 
       const AudioPerm = await Audio.requestPermissionsAsync();
       if (AudioPerm.status === "granted") {
         // alert("Audio Permission Granted");
       } else {
         alert(
-          "audio permisions not granted. status received: " + AudioPerm.status
+          "audio permisions not granted. status received: " + AudioPerm.status // to do: translate to english
         );
         return;
       }
     } catch (error) {
-      alert("error while requesting permisisons   " + error.message);
+      alert("error while requesting permisisons   " + error.message); // to do: translate to english
     }
     try {
       await stopSound();
@@ -384,7 +382,7 @@ const HomeScreen = () => {
     try {
       if (temporary) {
         if (!recordingName.trim()) {
-          alert("Please enter a name for the recording.");
+          alert("Please enter a name for the recording."); // to do: translate to english
           return;
         }
         const uri = await temporary.getURI();
@@ -465,11 +463,10 @@ const HomeScreen = () => {
     try {
       await stopSound();
       if (sound) await sound.stopAsync();
-      const readStoragePermission = await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-      );
+      const { status } = await MediaLibrary.getPermissionsAsync();
+
       await loadDelaySettings();
-      if (!readStoragePermission) {
+      if (status != "granted") {
         console.log("Permissions for reading external storage not granted.");
         return;
       }
@@ -524,35 +521,38 @@ const HomeScreen = () => {
 
   const requestDiskPermissions = async () => {
     let logMessage = ""; // To store log messages
+    console.log("getting disk permission");
     try {
       if (Platform.OS === "android") {
-        const readStoragePermission = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-        );
-        logMessage += `Read storage permission: ${readStoragePermission}\n`; // Log read storage permission result
+        console.log("android path");
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        logMessage += `Media Library permission: ${status}\n`; // Log media library permission result
 
-        const writeStoragePermission = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-        );
-        logMessage += `Write storage permission: ${writeStoragePermission}\n`; // Log write storage permission result
-
-        if (
-          readStoragePermission !== PermissionsAndroid.RESULTS.GRANTED ||
-          writeStoragePermission !== PermissionsAndroid.RESULTS.GRANTED
-        ) {
+        console.log(logMessage);
+        if (status !== "granted") {
           console.log("Disk permissions not granted");
-          alert("Disk permissions not granted:\n" + logMessage); // Display all permission results in an alert
+          Alert.alert(
+            "Disk Permissions Not Granted",
+            "Without these permissions, you won't be able to store recordings on disk.\n\nTo grant permission, please go to your device's Settings > Apps > [MeditationEcho] > Permissions and enable storage access.",
+            [{ text: "OK" }]
+          );
           return;
         }
       } else {
-        // Handle disk permissions for iOS if needed
       }
 
       console.log("Disk permissions granted successfully");
     } catch (error) {
-      alert(error.message);
-      alert("Disk permissions not granted:\n" + logMessage); // Display all permission results in an alert
+      console.log("wher are you");
+      // to do: translate to english
+      Alert.alert(
+        "Disk Permissions Not Granted",
+        "Without these permissions, you won't be able to store recordings on disk.\n\nTo grant permission, please go to your device's Settings > Apps > [MeditationEcho] > Permissions and enable storage access.",
+        [{ text: "OK" }]
+      );
       console.error("Error requesting disk permissions:", error);
+
+      alert(error.message);
     }
   };
 
@@ -631,13 +631,26 @@ const HomeScreen = () => {
           </View>
         }
         {recordingToBeSaved && (
-          <TextInput
-            style={styles.input}
-            placeholder="Enter recording name"
-            value={recordingName}
-            maxLength={25}
-            onChangeText={(text) => setRecordingName(text)}
-          />
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 18,
+                marginTop: 10,
+                lineHeight: 40,
+              }}
+            >
+              2.{" "}
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Enter recording name"
+              value={recordingName}
+              maxLength={25}
+              onChangeText={(text) => setRecordingName(text)}
+            />
+          </View>
         )}
         <View style={styles.delayContainer}>
           <Text style={styles.label}>{translate("Replay delay")}:</Text>
